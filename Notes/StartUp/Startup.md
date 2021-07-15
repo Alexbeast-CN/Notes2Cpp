@@ -1,8 +1,3 @@
----
-id: "my-id"
-class: "my-class1 my-class2"
----
-
 @import "my-style.less"
 
 # 第二章：开始学习C++ {ignore=true}
@@ -32,8 +27,6 @@ int main()                          // function header
     return 0;
 }
 ```
-
-
 
 
 ### 2.2 C++ 程序的一般格式
