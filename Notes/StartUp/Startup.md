@@ -1,3 +1,10 @@
+---
+id: "my-id"
+class: "my-class1 my-class2"
+---
+
+@import "my-style.less"
+
 # 第二章：开始学习C++ {ignore=true}
 ---
 ## 本章学习内容： {ignore=true}
