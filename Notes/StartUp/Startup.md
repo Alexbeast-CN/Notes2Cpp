@@ -13,7 +13,8 @@
 #### 2.1.1 第一个cpp程序
 
 myfirst.cpp
-```cpp {.line-numbers}
+
+```cpp
 // myfirst.cpp -- display a message
 #include <iostream>                 // a preprocessor directive
 int main()                          // function header
