@@ -189,7 +189,7 @@ int 表示变量是一个整型，它可以是正也可以是负，但不可以�
 cout << n;
 ```
 ### 2.6 使用 cin 对象进行输入
-#### 2.6.1 例程
+#### 例程
 ```cpp
 // getinfo.cpp -- input and output
 #include <iostream>
@@ -217,10 +217,117 @@ How many carots do you have?
 Here are two more
 Now you have 25 carrots.
 ```
-#### 2.6.2 类的简介
 
 ### 2.7 定义和使用简单的函数
-#### 2.7.1 一个有返回值的函数
+C++的函数分为两种，一种是有返回值的函数，另外一种是没有返回值的函数。
+#### 2.7.1 有返回值的函数
+有返回值的函数，如标准库`<cmath>`中的sqrt()函数。使用方法如下：
+```cpp
+X = sqrt(6.25);
+^   ^    ^
+1   2    3
+
+1. 函数返回的值赋值给X
+2. 函数名称
+3. 传递给函数的参数
+```
+Out：
+```cpp
+X = 2.5
+```
+发送出去，被赋值给X的值，就叫做函数的返回值。但使用有返回值的函数之前，要告诉C++的编译器，函数的参数和返回值的类型是什么。也就是说，参数和返回值是整数、小数、字符还是什么别的类型。比如刚才使用的sqrt()函数，函数的原型是：
+
+```cpp
+double sqrt(double);
+```
+第一个double表示函数返回值是double类型，第二个double表示函数输入值是一个double类型。那么我们在使用他的时候，就应该：
+
+```cpp
+double x;
+double y;
+
+x = 25;
+y = sqrt(x);
+```
+那么一个完整的sqrt程序就应该是：
+```cpp
+// sqrt.cpp -- using sqrt() function
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+int main(){
+    double x;
+    cout << "please enter a number." << endl;
+    cin >> x;
+    double y;
+    y = sqrt (x);
+    cout << "the square root of the number is: " << y << endl;
+
+    return 0;
+}
+```
+运行结果是：
+@import "./pics/8.png"
+
+```
+please enter a number.
+25
+the square root of the number is: 5
+```
+#### 2.7.2 函数变体
+除了sqrt()，这样的有一个参数，一个返回值的函数外，还有一些有多个参数，或没有参数，或有多个返回值的函数。比如：
+```cpp
+// pow函数接受2个参数，第一个为底，第二个为幂。
+double pow(double double);
+// rand函数不接受参数，随机返回一个整数。
+int rand();
+// 没有返回值的函数。
+void buck();
+// void 表明了函数没有返回值。
+```
+#### 2.7.3 用户自定义的函数
+
+例程：
+```cpp
+// convert stone to pounds
+
+#include <iostream>
+int stone2lb(int);  //function prototype
+int main()
+{
+    using namespace std;
+    int stone;
+    cout << "Enter the wight in stone" << endl;
+    cin >> stone;
+    int pounds = stone2lb(stone);
+    cout << stone << " stone = " ;
+    cout << pounds << " pounds" << endl;
+    return 0;
+}
+
+int stone2lb(int sts)
+{
+    return 14 * sts;
+}
+```
+输出结果如下：
+@import "./pics/9.png"
+```
+Enter the wight in stone
+12
+12 stone = 168 pounds
+```
+
+当然，例程中的stone2lb函数也可以改为：
+```cpp
+int stone2lb(int sts)
+{
+    int pounds = 14 * sts;
+    retuen pounds;
+}
+```
+
 
 
 
