@@ -187,3 +187,68 @@ Display the char in cout.put(): N!
 N
 Done
 ```
+### 3.1.7 布尔类型（bool）
+
+bool类型只能表示true或false。比如：
+```cpp
+bool is_ready = true;
+```
+
+`true`和`false`都可以转换为 int 的值，分为是`1`和`0`。
+```cpp
+int ans = true; // ans will be asigned as 1.
+int promise = false; // promisde will be asigned as 0.
+```
+此外任何的数值或指针都可以被转换为 bool 值，任何非零的值都会被转换为true，而零会被转换成false。
+```cpp
+bool start = -100; // start is true.
+bool stop = 0; //stop is false.
+```
+
+## 3.2 const 限定符
+`const`限定符可以方便我们再程序中设置一些常量，我们只需要修改一个位置，其他地方的值便会随之改变。与此类似的是C语言中的`#define`，但`const`要优于`#define`，因为`const`可以为常量创建类型。
+```cpp
+const float pi = 3.14;
+const float g = 9.81;
+```
+
+用`const`设定之后就可以使用`pi`和`g`来表示对应的数值了。
+
+## 3.3 浮点数
+C++中有3种浮点类型：`float`, `double`, `long double`。其中`float`至少32位，`double`至少64位，`long double`可以为80，96，128位。下面我们用一个程序来展示他们之间精度的差异。
+
+```cpp
+// floatnum.cpp -- floating-point types
+
+#include <iostream>
+using namespace std;
+main()
+{
+    cout.setf(ios_base::fixed, ios_base::floatfield);
+
+    float tub = 10.0 / 3.0;   //可以精确到小数点后六位数
+    double mint = 10.0 / 3.0; //可以精确到小数点后15位数
+    const float million = 1.0e6;
+
+    cout << "tub = " << tub;
+    cout << ", a minllion tub = " << million * tub;
+    cout << ", \nand ten million tub = " << 10 * million * tub;
+    cout << endl;
+
+    cout << "mint = " << mint << ", and a million mint = ";
+    cout << million * mint << endl;
+
+    return 0;
+}
+```
+
+out:
+
+```
+tub = 3.333333, a minllion tub = 3333333.250000,    
+and ten million tub = 33333332.000000
+mint = 3.333333, and a million mint = 3333333.333333
+```
+
+通常cout会删除结尾的零。例如，将3333333.250000显示为3333333.25。调用`cout.setf()`将会覆盖这种行为。但要注意的是，`tub` 和 `mint` 由于`cout`的原因，都被打印为3.333333，但由于`float`和`double`精度的不同，当$tub\times 1e6$ 后变成了333333.250000，而$mint\times 1e6$ 依然是333333.333333。
+
