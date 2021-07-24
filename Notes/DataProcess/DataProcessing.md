@@ -1,5 +1,5 @@
 @import "my-style.less"
-# C++ Primer 学习笔记 {ignore=true}
+# C++ Primer Plus 学习笔记 {ignore=true}
 ---
 
 # 第三章：处理数据 {ignore=true}
