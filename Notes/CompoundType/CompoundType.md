@@ -1,7 +1,7 @@
 # C++ Primer Plus 学习笔记 {ignore=true}
 ---
 
-# 第四章：复合类型 {ignore=true}
+# 第四章：复合类型（上） {ignore=true}
 
 ## 本章学习内容： {ignore=true}
 [TOC]
@@ -209,4 +209,122 @@ TIM D
 Which city do you live in? 
 Suzhou
 Okey, now I know you're TIM D and you live in Suzhou
+```
+
+`getline()`一次可以读取一行的输入信息，以换行符确定行尾，并将换行符变成空字符。
+
+另外一种`get()`与`getline()`的不同点就在于`get()`并不是以换行符结尾，而是会读取换行符。要实现`getlin()`的效果，我们可以使用`cin.get(name, size).get()`下面的例程将会展示`get()`的用法：
+
+```cpp
+// instr.cpp -- read more than one word with get() & get()
+
+#include <iostream>
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    const int ArSize = 20;
+    char name[ArSize];
+    char city[ArSize];
+
+    cout << "What's your name? \n";
+    cin.get(name,ArSize).get();
+    cout << "Which city do you live in? \n";
+    cin.get(city,ArSize).get();
+
+
+    cout << "Okey, now I know you're " << name << " and you live in ";
+    cout << city << endl;
+
+    return 0;
+}
+```
+
+out:
+```
+What's your name? 
+Which city do you live in? 
+Suzhou
+Okey, now I know you're TIM D and you live in Suzhou
+```
+
+但如果我们只使用`cin.get()`则会出现以下现象：
+```
+What's your name?
+TIM D
+Which city do you live in?
+Okey, now I know you're TIM D and you live in
+```
+在我第一次输入后，便不再询问再次输入。书籍《C++ Primer Plus》推荐的输入方式是`cin.get()`，具体原因会在后面的章节中讲到。
+
+## 4.2 String类介绍
+
+在`string`头文件中的`string`类是和字符串类型功能类似的存在。其好处是我们可以像处理变量一样，去处理strig。下面的例程演示了`string`的用法。
+
+```cpp
+// strtype1.cpp -- using the C++ string class
+#include <iostream>
+#include <cstring>
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+
+    char animal1[20];
+    char animal2[20] = "jaguar";
+    string str1;
+    string str2 = "panther";
+
+    cout << "Enter a kind of feline." << endl;;
+    cin.get(animal1,20).get();
+    cout << "Enter another feline." << endl;
+    cin >> str1;
+    cout << "Here are some felines: " <<
+    animal1 << " " << animal2 << " " <<
+    str1 << " " << str2 << endl;
+    cout << "The third letter in " << animal2 <<
+    " is " << animal2[2] << endl;
+    cout << "The third letter in " << str2 <<
+    " is " << str2[2] << endl;
+
+    return 0;
+}
+```
+
+out:
+
+```
+Enter a kind of feline.
+Tiger
+Enter another feline.
+Ocelot 
+Here are some felines: Tiger jaguar Ocelot panther
+The third letter in jaguar is g
+The third letter in panther is n
+```
+
+`string`类相比使用`char`会有很多方便之处：
+* 无需声明长度，在使用`cin >> str1;`的时候，程序会自动调整`str1`的长度。
+* `string`可以进行赋值，`string`类的操作会比数组更加方便，一个数组不能赋值给另一个数组，但`string`可以。
+
+```cpp
+string animal1 = "tiger";
+char charr1[20] = "tiger";
+string animal2;
+char charr2[20];
+animal2 = animal1;  //VALID
+charr2 = charr1;    //INVALID
+```
+
+* `string`类简化了字符串的合并操作。可以使用运算符`+`将两个`string`对象合并起来，还可以用`+=`将一个字符串添加到另一个`string`对象的结尾。
+```cpp
+string str1 = "I LOVE";
+string str2 = "U";
+string str3;
+str3 = str1 + str2;
+str1 += str2;
+```
+则：
+```
+str3 = I LOVE U
+str1 = I LOVE U
 ```
