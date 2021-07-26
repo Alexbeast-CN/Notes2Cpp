@@ -256,7 +256,7 @@ Okey, now I know you're TIM D and you live in
 ```
 在我第一次输入后，便不再询问再次输入。书籍《C++ Primer Plus》推荐的输入方式是`cin.get()`，具体原因会在后面的章节中讲到。
 
-## 4.2 String类介绍
+## 4.3 String类介绍
 
 在`string`头文件中的`string`类是和字符串类型功能类似的存在。其好处是我们可以像处理变量一样，去处理strig。下面的例程演示了`string`的用法。
 
