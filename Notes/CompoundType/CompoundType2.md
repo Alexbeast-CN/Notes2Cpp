@@ -170,6 +170,25 @@ The guests Bambi and Godzilla
 have a combined volume of 2000.5cubic cm.
 ```
 
+## 4.5 枚举
+`enum`枚举工具提供了另外一种创建符号常量的方式，这种方式可以代替`const`。它还允许定义新类型，但必须按严格的限制进行。使用方式如下：
+```cpp
+enum spectrum {red, orange, yellow,green, blue, violet, indigo, ultravilet}; //共8个值
+```
+上方的语句完成了两项任务：
+* 让 `spectrum`成为新类型的名称；`spectrum`被称为枚举(enumeraton)，就像`struct`变量被称为结构一样。
+* 将`red`, `orange`, `yellow`等作为符号常量，它们对应的整数值为：0-7。这些常量叫做枚举量（enumerator）。
+
+一般来说，枚举量不用来计算。
+
+枚举常用来代替`const`，使用方法如下：
+```cpp
+enum {zero, null = 0, one, numero_uno = 1};
+// zero 和 null 都是常量 0， one 和 number_uno 都是常量 1.
+```
+
+## 4.6 指针和自由存储空间
+
 
 
 
