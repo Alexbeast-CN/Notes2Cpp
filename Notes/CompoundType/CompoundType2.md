@@ -306,8 +306,122 @@ int tacos [10];     // now tacos is the same as &tacos[0]
 ```
 
 * 指针算术
-C++允许指针和整数相加。加1的结果等于原来的地址值加上
+C++允许指针和整数相加。加1的结果等于原来的地址值加上指向的对象占用的总字节数。还可以将一个指针减去另一个指针，获得两个指针的差。后一种运算将得到一个整数，仅当两个指针指向同一个数组时，这种运算才有意义；这将得到两个元素的间隔。
+下面时一些示例：
+```cpp
+int tacos[10] = {5,2,8,4,1,2,2,4,6,8};
+int * pt = tacos;   // suppose pf and taci are the address 3000
+pt = pt + 1;        // now pt is 3004 if a int is 4 bytes
+int *pe = &tacos[9];     // pe is 3036 if a int is 4 bytes
+pe = pe - 1;             // pe is 3036, the address of tacos [8]
+int diff = pe - pt;      // diff is 7, the separation between tacos[8] and tacos[1]
+```
 
 * 数组的动态联编和静态联编
+使用数组声明来创建数组时，将采用静态联编，即数组的长度在编译时设置：
+```cpp
+int tacos [10];     // static binding, size fixed at compile time
+```
+使用`new[]`运算符创建数组时，将采用动态联编（动态数组），即将在运行时为数组分配空间，其长度也将在运行时设置。使用完这种数组后，应使用`delete[]`释放器占用的内存;
+```cpp
+int size;
+cin >> size;
+int *pz = new int [size];     // dynamic binding, size set at run time
+
+delete [] pz;                 // free memory when finished
+```
 
 * 数组表示法和指针表示法
+使用方括号数组表示法等同于对指针解除引用：
+
+`tacos[0]`等同于`*tacos` 就是`tacos`地址处的值。
+`tacos[3]`等同于`*(tacos + 3)` 就是 `tacos + 3`地址处的值。
+数组名和指针变量都是如此，因此对于指针和数组名，即可以使用指针表示法，也可以使用数组表示法。
+下面是一些示例：
+```cpp
+int * pt = new int [10];      // pt points to block of 10 ints
+*pt = 5;                      // set element number 0 to 5
+pt[0] = 6;                    // set element number 0 to 6
+pt[9] = 44;                   // set element number 9 to 44
+int coats [10];
+* (coats + 4) = 12;           // set coats[4] to 12
+```
+
+### 4.7.4 使用 new 创建动态结构
+下面的例程展示了使用`new`创建一个动态结构的方法：
+```cpp
+// newstrct.cpp  -- using new with a structure
+#include <iostream>
+struct inflatable
+{
+    char name[20];
+    float volume;
+    double price;
+};
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    inflatable *ps = new inflatable; // allot memory for structure
+    cout << "Enter name of inlatable item: ";
+    cin.get(ps->name, 20); // method 1 for member access
+    cout << "Enter volume in cubic feet: ";
+    cin >> (*ps).volume; // method 2 for member access
+    cout << "Enter price: $";
+    cin >> ps->price;
+    cout << "Name: " << (*ps).name << endl;    // method 2
+    cout << "Volume: " << ps->volume << endl;  // method 1
+    cout << "Price: $" << (*ps).price << endl; // method 2
+    delete ps;                                 // free memory used by structure
+    return 0;
+}
+```
+out:
+```
+Enter name of inlatable item: Football
+Enter volume in cubic feet: 23
+Enter price: $17.2
+Name: Football
+Volume: 23
+Price: $17.2
+```
+一个使用`delete`的示例：
+```cpp
+// delete.cpp -- using the delete operator
+#include <iostream>
+#include <cstring>
+using namespace std;
+char *getname(void); // function prototype
+int main(int argc, char *argv[])
+{
+    char *name; //create pointer but no storage
+
+    name = getname(); // assign address of string to name
+    cout << name << " at " << (int *)name << endl;
+    delete[] name; // memory freed
+
+    name = getname(); // reuse freed memory
+    cout << name << " at " << (int *)name << endl;
+    delete[] name; // memory freed
+
+    return 0;
+}
+
+char *getname() // return pointer to new string
+{
+    char temp[80]; // temporary storage
+    cout << "Enter last name: ";
+    cin >> temp;
+    char *pn = new char[strlen(temp) + 1];
+
+    strcpy(pn, temp); // copy string into smaller space
+    return pn;
+}
+```
+out:
+```
+Enter last name: Kang
+Kang at 0xeb1680
+Enter last name: Chen
+Chen at 0xeb1680
+```
