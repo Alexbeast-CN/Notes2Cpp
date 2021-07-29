@@ -241,6 +241,73 @@ access two elements with pointer notation.
 *stack = 3, *(stakc + 1 ) = 2
 ```
 
+### 4.7.1 程序说明
+在大多数情况下，C++将组名解释为数组的第一个元素的地址。因此，下面的语句将`pw`声明指向`double`类型的指针，然后将他初始化为`wages`中第一个元素的地址。
+```cpp
+double * pw = wages;
+```
+和所有数组一样`wages`也存在下面的等式：
+```cpp
+wages = &wages[0] = address of first element of array
+```
 
+程序中使用的`* (stack + 1)`与`stack[1]`的效果相同。但是`* (stack + 1)`与`*stack + 1` 又不一样，其区别是后者将指针偏移了。
 
+指针与数组的另外一个区别是，在使用`sizeof`运算符的时候，对数组对应的是数组的长度，而对指针应用`sizeof`得到的是指针的长度。比如之前的例子中，使用`sizeof(wages)`的结果会是24， `sizeof(pw)`的结果是4.
 
+### 4.7.2 数组的地址
+对数组取地址的时候，数组名不会被解释为其地址，而是数组中第一个元素的地址，而对数组名应用地址运算符的时候，得到的是整个数组的地址：
+```cpp
+short tell[10]; // tell an array of 20 bytes
+cout << tell << endl;    // displays &tell[0]
+cout << &tell << endl;   // displays address of whole array
+```
+从数字上说，这两个结果是相同的，但是从概念上说，`&tell[0]`是一个2字节内存的地址，而`&tell`是一个20字节内存块的地址。内存，表达式`tell + 1`将地址加2，而表达式`&tell + 1`将地址加20。
+
+### 4.7.3 指针小结
+* 声明指针
+```cpp
+typeName * pointerName;
+```
+* 给指针赋值
+
+```cpp
+double * pn;             // pn can point to a double value
+double * pa;             // so can pa
+char * pc;               // pc can point to a char value
+double bubble = 3.2;     
+pn = &bubble;            // assign address of bubble to pn
+// assign address of newly allocated char memory to pc    
+pc = new char;           
+
+// assign address of 1st element of arrary of 30 double to pa 
+pa = new double[30];
+```
+
+* 对指针解除引用
+对指针解除引用意味着获得指针所指向的值。
+```cpp
+cout << *pn;   // print the value of bubble
+*pc = 's';     // place 's' into the memory location whose address is pc
+```
+注意：不要对未初始化的指针解除引用。
+
+* 区别指针和指针所指向的值
+如果`pt`是指向`int`的指针，则`*pt`是完全等同于`int`变量。
+```cpp
+int * pt = new int;
+*pt = 5
+```
+
+* 数组名
+一般情况下，C++将数组名视为数组第一个元素的地址。
+```cpp
+int tacos [10];     // now tacos is the same as &tacos[0]
+```
+
+* 指针算术
+C++允许指针和整数相加。加1的结果等于原来的地址值加上
+
+* 数组的动态联编和静态联编
+
+* 数组表示法和指针表示法
