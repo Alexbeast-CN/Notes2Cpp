@@ -425,3 +425,6 @@ Kang at 0xeb1680
 Enter last name: Chen
 Chen at 0xeb1680
 ```
+
+程序说明：
+首先来看一下函数`getname()`。它使用`cin`将单词放入`temp`数组中，然后使用`new`重新分配内存。重新分配的内存使用的空间为`strlen(temp) + 1`，加一是因为还需要一个字符来储存字符串。然后使用`strcpy()`将`temp`中的字符串复制到新的内存块中。最后，函数返回`pn`这是字符串副本的地址。
