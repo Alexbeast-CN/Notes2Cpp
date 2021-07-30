@@ -428,3 +428,37 @@ Chen at 0xeb1680
 
 程序说明：
 首先来看一下函数`getname()`。它使用`cin`将单词放入`temp`数组中，然后使用`new`重新分配内存。重新分配的内存使用的空间为`strlen(temp) + 1`，加一是因为还需要一个字符来储存字符串。然后使用`strcpy()`将`temp`中的字符串复制到新的内存块中。最后，函数返回`pn`这是字符串副本的地址。
+
+在`main()`中，返回值（地址）被赋给了指针`name`。该指针是在`main()`中定义的，但它指向`getname()`函数中分配的内存块。内存被释放后再次调用`getname()`，从结果看，这次使用的内存地址依然是上一次选择的地址。
+
+
+## 4.8 类型组合
+不多说了直接上例程：
+```cpp
+// mistypes.cpp -- some type combinations
+#include <iostream>
+
+struct antarctic_years_end
+{
+    int year;
+    // some really interesting data, etc.
+};
+
+int main(int argc, char *argv[])
+{
+    antarctic_years_end s01, s02, s03;
+    s01.year = 1998;
+    antarctic_years_end *pa = &s02; //指向结构的指针
+    pa->year = 1999;
+    antarctic_years_end trio[3]; // array of 3 structures
+    trio[0].year = 2003;
+    std::cout << trio->year << std::endl;
+    const antarctic_years_end *arp[3] = {&s01, &s02, &s03};
+    std::cout << arp[1]->year << std::endl;
+    const antarctic_years_end **ppb = arp;
+    auto ppb = arp; //C++ 11 automatic tyoe deduction
+    std::cout << (*ppb)->year << std::endl;
+    std::cout << (*(ppb + 1))->year << std::endl;
+    return 0;
+}
+```
