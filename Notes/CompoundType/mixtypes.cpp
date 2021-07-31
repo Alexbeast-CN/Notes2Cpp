@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
     std::cout << trio->year << std::endl;
     const antarctic_years_end *arp[3] = {&s01, &s02, &s03};
     std::cout << arp[1]->year << std::endl;
-    const antarctic_years_end **ppb = arp;
+    const antarctic_years_end ** ppa = arp;
     auto ppb = arp; //C++ 11 automatic tyoe deduction
-    std::cout << (*ppb)->year << std::endl;
+    std::cout << (*ppa)->year << std::endl;
     std::cout << (*(ppb + 1))->year << std::endl;
     return 0;
 }

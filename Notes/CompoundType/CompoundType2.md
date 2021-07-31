@@ -462,3 +462,160 @@ int main(int argc, char *argv[])
     return 0;
 }
 ```
+out:
+```
+2003
+1999
+1998
+1999
+```
+### 4.8.1 程序分析
+首先，我们创建了一个结构：
+```cpp
+struct antarctic_years_end
+{
+    int year;
+};
+然后创建这种结构的变量：
+```cpp
+antarctic_years_end s01, s02, s03;
+```
+再通过成员运算符访问变量：
+```cpp
+s01.year = 1998;
+```
+也可以创建指针指向这种结构的指针：
+```cpp
+antarctic_years_end * pa = &s02;
+```
+该指针设置为有效地址后就可以使用简介成员运算符来访问成员：
+```cpp
+pa ->year = 1999;
+```
+创建一个结构数组：
+```cpp
+antarctic_years_end trio[3];
+```
+然后使用成员运算符访问元素成员：
+```cpp
+trio[0].year = 2003;
+```
+其中`trio`是一个数组，而`trio[0]`是一个结构，`trio[0].year`是该结构的一个成员。由于数组名也是一个指针，因此我们也可以使用间接成员运算符：
+```cpp
+(trio+1) ->year = 2004;
+```
+创建一个指针数组：
+```cpp
+const antarctic_years_end * arp[3] = {&s01, &s02, &s03};
+```
+`arp`是一个指针数组，那么`arq[1]`就是一个指针，可以将间接成员运算符应用于它：
+```cpp
+std::cout << arp[1]->year << std:endl;
+```
+我们也可以创建指向上述数组的指针：
+```cpp
+const antarctic_years_end ** ppa = arp;
+```
+其中`arp`是一个数组名称，因此它是第一个元素的地址。但第一个元素为指针，因此`ppa`是一个指针，指向`const antarctic_years_end`的指针。当然`ppa`的命名比较复杂。我们可以直接使用`auto`来创建它：
+```cpp
+auto ppb = arp;
+```
+因为`auto`知道`arp`的类型，因此可以推出`ppb`的类型。`ppa`与`ppb`等价。
+由于`ppa`是一个指向结构指针的指针，因此`*ppa`是一个结构指针，可以使用间接成员运算符应用于它：
+```cpp
+std::cout << (*ppa)->year << std::endl;
+```
+
+## 4.9 数组的替代品
+
+### 4.9.1 模板类 vector
+基本上来说，`vector`是使用`new`创建动态数组的替代品。它可以自动完成`new`和`delete`的内存管理工作。
+
+要使用`vector`对象，必须包含头文件`vector`，其名称空间是`std`。下面是一些例子：
+
+```cpp
+#include <vector>
+...
+using namespace std;
+vector<int> vi; // create a zero-size array of int
+int n;
+cin >> n;
+vector<double> vd(n);   // create an array of n doubles
+```
+
+其通用使用方法是：
+```cpp
+vector<typeName> vt(n_elem)
+```
+### 4.9.2 模板类 array
+`vector`类的功能比数组强大，但是效率低。因此有些时候我们也可以使用`array`来代替数组：
+```cpp
+#include <array>
+...
+using namespace std;
+array<int, 5> ai;
+array<double, 4> ad = {1.2, 2.1, 3.42, 4.3};
+```
+
+其通用使用方法是：
+```cpp
+array<typeName, n_elem> arr
+```
+于`vector`不同的是，创建的`n_elem`不能是变量。
+
+### 4.9.3 比较数组、vector 对象和array 对象
+直接看例程：
+```cpp
+// choices.cpp -- array variations
+#include <iostream>
+#include <vector>
+#include <array>
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    double a1[4] = {1.2, 2.4, 3.6, 4.8};
+    vector<double> a2(4);
+    a2[0] = 1.0/3.0;
+    a2[1] = 1.0/5.0;
+    a2[2] = 1.0/7.0;
+    a2[3] = 1.0/9.0;
+    array<double, 4> a3 = {3.14, 2.72, 1.62, 1.41};
+    array<double, 4> a4;
+    a4 = a3;    // valid for array objects of same size
+
+    cout << "a1[2] : " << a1[2] << " at " << &a1[2] << endl;
+    cout << "a2[2] : " << a2[2] << " at " << &a2[2] << endl;
+    cout << "a3[2] : " << a3[2] << " at " << &a3[2] << endl;
+    cout << "a4[2] : " << a4[2] << " at " << &a4[2] << endl;
+
+    //misdeed
+    a1[-2] = 20.2;
+    cout << "a1[-2] : " << a1[-2] << " at " << &a1[-2] << endl;
+    
+    return 0;
+}
+```
+out:
+```
+a1[2] : 3.6 at 0x61fdf0
+a2[2] : 0.142857 at 0x1e1690
+a3[2] : 1.62 at 0x61fdb0
+a4[2] : 1.62 at 0x61fd90
+a1[-2] : 20.2 at 0x61fdd0
+```
+
+**程序说明**
+无论是数组，`vector`还是`array`对象，都可以使用标准的数组表示法来访问各个元素。其次，从地址可知，`array`对象和数组存储再同样的存储区域（即栈）中，而`vector`在另外一个区域（自由存储区或堆）中。第三，注意到可以将一个`array`赋值给另一个`array`对象。而数组必须逐元素复制数据。
+
+接下来有一行代码值得我们注意：
+```cpp
+a1[-2] = 20.2;
+```
+由指针的知识我们知道，上面的代码可以转换成如下代码：
+```cpp
+* (a1 -2) = 20.2;
+```
+其含义是找到`a1`指向的地方，向前移两个`double`元素，并将20.2储存到目的地。但这样使用方法其实并不是一个合适的行为，如果我们像禁止这样的非法索引，可以使用`at()`:
+```cpp
+a2.at(1) = 2.3;
+```
