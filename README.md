@@ -1,6 +1,5 @@
-# C++ Primer 学习笔记 {ignore=true}
+# 基于 《C++ Primer Plus》 的学习笔记 
 ---
-
 - [第二章：开始学习C++](#第二章开始学习c)
   - [2.1 创建C++程序](#21-创建c程序)
     - [2.1.1 第一个cpp程序](#211-第一个cpp程序)
@@ -108,11 +107,11 @@ int main()                          // function header
 
 代码完成后使用g++进行编译。首先`Terminal` :fa-arrow-right: `New Terminal` 打开一个终端。查看目前终端所在的所在路径。
 
-@import "./pics/1.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/1.png)
 
 如图，目前所在的文件是`StartUp`中，也是`MyFirst.cpp`所在的的文件夹；若不是，需使用指令`cd`，将路径切换到`.cpp`文件所在的路径。
 例：
-@import "./pics/2.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/2.png)
 
 然后再运行`g++`的指令编译刚才的代码：
 ```cdm
@@ -120,7 +119,7 @@ g++ -g .\MyFirst.cpp -o MyFirst
 ```
 此时，左侧的目录就可以看到刚刚创建的一个叫`MyFirst.exe`的执行文件。
 直接在Terimial中输入`.\MyFirst.exe`我们运行这个文件，结果如下：
-@import "./pics/3.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/3.png)
 
 至此，我们的第一个C++程序完成。
 
@@ -205,7 +204,8 @@ cout << endl;
 } 
 ```
 结果如下：
-@import "./pics/4.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/4.png)
+
 输出为：
 ```
 The Good, theBad, and the Ukulele
@@ -243,7 +243,8 @@ int main()
 }
 ```
 结果如下：
-@import "./pics/5.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/5.png)
+
 ```
 n = 25
 n = 24
@@ -254,7 +255,9 @@ n = 24
 int n;
 ```
 int 表示变量是一个整型，它可以是正也可以是负，但不可以有小数。这样可以防止在使用变量的时候出现打错的现象。比如：
-@import "./pics/6.png"
+
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/6.png)
+
 在输入变量的时候，便会有提示出现。
 
 ### 2.5.3 cout
@@ -283,7 +286,8 @@ int main()
 }
 ```
 结果如下：
-@import "./pics/7.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/7.png)
+
 
 ```
 How many carots do you have?
@@ -342,7 +346,8 @@ int main(){
 }
 ```
 运行结果是：
-@import "./pics/8.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/8.png)
+
 
 ```
 please enter a number.
@@ -386,7 +391,8 @@ int stone2lb(int sts)
 }
 ```
 输出结果如下：
-@import "./pics/9.png"
+![ ](https://github.com/Alexbeast-CN/Notes2Cpp/blob/main/Notes/StartUp/pics/9.png)
+
 ```
 Enter the wight in stone
 12
