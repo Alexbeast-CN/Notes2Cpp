@@ -293,3 +293,67 @@ Next two numbers (q to quit): q
 <font color = #1E90FF>程序说明：</font>
 
 程序使用`numbers`作为牌的总数，`picks`作为需要参与者选取的个数。每一次选择的概率都是$P = \frac{picks}{numbers} $，而每选取一次牌库以及需要选取的个数都会`-1`。因此只需让概率相乘，直到`picks`变成零，即为我们要求的概率。
+
+
+## 7.3 函数与数组
+在函数的使用过程中需要经常用到数组。这里我们可以将数组名作为参数使用。例如下面的声明中，将一个形参声明为数组名。
+
+```cpp
+int sum_arr(int arr[ ], int n)  // arr = array name, n = size
+```
+
+从声明看，我们的函数中有一个`arr`数组，其后面的方括号为空表示可以将任何长度的数组传递给函数。但其实，`arr`并不是一个数组，而是一个指针！好消息是在编写函数的时候可以将`arr`看作为一个数组。
+
+下面将展示一道例题，包括数组的函数中含数组参数的使用。
+
+<font color = #1E90FF>题目：</font>
+用一个数组记录野餐中每个人吃甜饼的数量。每个数组引索都对应一个人，元素值对应于这个人所持的甜饼的数量。要求甜饼的总数。
+
+```cpp
+// arrfun1.cpp -- functions with an array argument
+
+#include <iostream>
+
+const int ArSize = 8;
+int sum_arr(int arr[], int n);      //prototype
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    int cookies[ArSize];
+    cout << "Please enter 8 numbers" << endl;
+    for (int i = 0; i < 8; i++)
+        cin >> cookies[i];
+
+    int sum = sum_arr(cookies, ArSize);
+    cout << "Total cookies eaten: " << sum << endl;
+    return 0;
+}
+
+// return the sum of an integer array
+int sum_arr(int arr[], int n)
+{
+    int total = 0;
+    for (int i = 0; i <n; i++)
+        total = total + arr[i];
+    
+    return total;
+}
+```
+
+out:
+
+```
+Please enter 8 numbers
+1 3 5 8 4 8 4 8
+Total cookies eaten: 41
+```
+
+### 7.3.1 函数如何使用指针来处理数组
+一般情况下，C++将数组名视为指针。`cookies == &cookies[0]`。但该规则有一些例外的情况。首先数组声明使用数组名来标记存储位置；其次，对数组名使用`sizeof`将得到整个数组的长度（以字节为长度）；第三，将地址运算符&用于数组名时，将返回整个数组的地址，例如`&cookies`将返回一个32字节内存块的地址（如果int长度为4字节）。
+
+如果是这样的话，我们在声明函数的时候使用指针的形式来声明，即`int * `。这表明，函数头还是这样的:
+```cpp
+int sum_arr(int * arr, int n) // arr = array name, n = size
+```
+
+那么借用指针的思想，上面的例程还可以写作：（P230）
