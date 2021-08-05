@@ -356,4 +356,132 @@ Total cookies eaten: 41
 int sum_arr(int * arr, int n) // arr = array name, n = size
 ```
 
-那么借用指针的思想，上面的例程还可以写作：（P230）
+那么借用指针的思想，上面的例程中的部分语句还可以写作：
+```cpp
+arr[i] = *(ar + 1);     // values in two notations
+&arr[i] = ar + 1;       // addrress in two notations
+```
+
+### 7.3.2 更多数组函数示例
+
+<font color = #1E90FF>示例1：</font>
+假设使用一个数组来记录房地产的价值，房地产的数目不超过5个。在考虑对房地产数组进行操作的时候，有2个基本的要点，首先我们要将值读入数组中，另外我们还要重新评估每种房地产的价值，假设每种房地产都以相同的比例增加或减少。
+
+那么我们的代码就可以写作：
+```cpp
+//arrayfun2.cpp -- array functions and const
+#include <iostream>
+const int Max = 5;
+// function prototypes
+int fill_array(double * ar, int limit);
+void show_array(const double * ar, int n);
+void revalue(double r, double * ar, int n);
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    double properties[Max];
+
+    int size = fill_array(properties, Max);
+    show_array(properties, size);
+    if (size > 0 )
+    {
+        cout << "Enter revaluation factor: ";
+        double factor;
+        while (!(cin >> factor))    //bad input
+        {
+            cin.clear();
+            while (cin.get() != '\n')
+                continue;
+            cout << "Bad input; please enter a number: ";
+        }
+        revalue(factor, properties, size);
+        show_array(properties, size);
+    }
+    cout << "Done. \n";
+    cin.get();
+    cin.get();
+    return 0;
+}
+
+int fill_array(double * ar, int limit)  
+{
+    using namespace std;    
+    double temp;
+    int i;
+    for ( i = 0; i < limit; i++)    // 逐个读取数组中的元素
+    {
+        cout << "Enter value #" << (i + 1) << ": ";
+        cin >> temp;
+        if (!cin)   // 如果有错误输入（非double类型的值）
+        {
+            cin.clear();    // 清空输入
+            while (cin.get() != '\n')
+                continue;   // 执行下一行代码
+            cout << "Bad input; input process terminated.\n";
+            break;
+        }
+        else if (temp < 0)  // 负数为中断信号
+            break;
+        ar [i] = temp;
+    }
+    return i;
+}
+
+ void show_array(const double * ar, int n)
+ {
+     using namespace std;
+     for (int i = 0; i < n; i++)
+     {
+         cout << "Property #" << (i+1) << ": $";
+         cout << ar[i] << endl;
+     }
+ }
+
+// multiplies each element of ar[] by r
+void revalue (double r, double * ar, int n)
+{
+    for (int i = 0; i < n; i++)
+        ar[i] *= r;
+}
+```
+
+out:
+```
+Enter value #1: 1000
+Enter value #2: 3200
+Enter value #3: 1200
+Enter value #4: -1
+Property #1: $1000
+Property #2: $3200
+Property #3: $1200
+Enter revaluation factor: 0.3
+Property #1: $300
+Property #3: $360
+Done.
+```
+
+<font color = #1E90FF>程序解释：</font>
+
+1. 填充数组
+```cpp
+int fill_array(double * ar, int limit)
+```
+上面的函数是我们的填充数组函数，它有两个参数，一个是我们的数组名，另一个是数组的最大长度。这里我们人为的设置数组的最大长度为5。函数的作用是连续的将值读入数组中，当然考虑到可能有些没有5个房产，因此我们也要设置一个可以提前结束循环的按键。这里考虑到房产价值不会为负，因此将负数作为输入结束的指令。另外，该函数还应该为错误输入做出反应，如停止输入等。
+
+2. 显示数组以及用`const`保护数组
+```cpp
+void show_array(const double * ar, int n );
+```
+为了确保函数不会修改原始数组，我们需要在声明中使用`const`字符来保护数组。在上方函数的声明中，指针`ar`指向的是常量数据。这意味着不能使用`ar`修改数据。也以为着只能查看而不能修改。因此，如果在`show_array`函数中使用了`ar[0] +=10;`操作，编译器则会报错。
+
+3. 修改数组
+```cpp
+void revalue (double r, double * ar, int n);
+```
+在这个函数中，一共有3个参数，分别为重新评估因子，数组指针，元素数目。由于我们需要修改数组中元素的值，因此我们不能使用`const`。
+
+在这个过程中，我们使用的是自下而上的一种思想，即先思考数据类型和设计恰当的函数来处理数据，然后将这些函数合成以给程序。与之对应的自上而下的思想则是先指定模块化设计方案，然后再研究细节。
+
+### 7.3.4 使用数组区间的函数 （P237）
+
