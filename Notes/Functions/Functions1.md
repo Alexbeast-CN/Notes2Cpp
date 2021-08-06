@@ -461,7 +461,7 @@ Property #3: $360
 Done.
 ```
 
-<font color = #1E90FF>程序解释：</font>
+<font color = #1E90FF>程序说明：</font>
 
 1. 填充数组
 ```cpp
@@ -483,5 +483,240 @@ void revalue (double r, double * ar, int n);
 
 在这个过程中，我们使用的是自下而上的一种思想，即先思考数据类型和设计恰当的函数来处理数据，然后将这些函数合成以给程序。与之对应的自上而下的思想则是先指定模块化设计方案，然后再研究细节。
 
-### 7.3.4 使用数组区间的函数 （P237）
+### 7.3.4 使用数组区间的函数 
+用C++函数处理数组的传统方式是将数组中的数据种类，数组的起始位置和数组中元素的数量提交给它。还有另外一种给函数提供所需信息的方法是元素区间法。这可以通过两个指针来完成。一个指针表示数组的开头，另一个指针标识数组的尾部。也就是说，对于一个数组而言，标识数组结尾的参数将是指向最后一个元素后面的指针。例如：
+```cpp
+double elbuod[20];
+```
+则指针`elboud`和`elboud + 20`定义了区间。首先，数组名`elboud`指向第一个元素。表达式`elboud + 19`指向最后一个元素，即`elboud[19]`。因此`elboud + 20`指向数组结尾后面的一个位置。下面的例程将展示这个功能的用法：
+
+```cpp
+// arrfun3.cpp -- functions with an array range
+
+#include <iostream>
+
+const int ArSize = 8;
+int sum_arr(int *begin, int *end); //prototype
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    int cookies[ArSize];
+    cout << "Please enter 8 numbers" << endl;
+    for (int i = 0; i < 8; i++)
+        cin >> cookies[i];
+
+    int sum = sum_arr(cookies, cookies + ArSize);
+    cout << "Total cookies eaten: " << sum << endl;
+    sum = sum_arr(cookies, cookies + 3);
+    cout << "The first 3 eater ate: " << sum << " cookies. \n";
+
+    sum = sum_arr(cookies + 4, cookies + 8);
+    cout << "The last 4 eaters ate: " << sum << " cookies. \n";
+
+    return 0;
+}
+
+// return the sum of an integer array
+int sum_arr(int *begin, int *end)
+{
+    const int * pt;
+    int total = 0;
+
+    for (pt = begin; pt != end; pt++)
+        total = total + *pt;
+    return total;
+}
+```
+
+out:
+```
+Please enter 8 numbers
+5 6 7 2 1 5 3 4 
+Total cookies eaten: 33
+The first 3 eater ate: 18 cookies.
+The last 4 eaters ate: 13 cookies.
+```
+
+<font color = #1E90FF>程序说明：</font>
+
+值得注意的是`sun_array()`中的`for`循环
+
+```cpp
+for (pt = begin; pt != end; pt++)
+    total = total + *pt;
+```
+
+它将`pt`设置为指向要处理的第一个元素(begin指向的元素)的指针，并且将`*pt`（元素的值）加入到`total`中。然后，循环通过递增的操作来更新`pt`，使指指向下一个元素。只要`pt`不等于`end`，这一过程就将继续下去。当`pt`等于`end`时，它将指向区间中最后一个元素的后面的一个位置，此循环结束。
+
+### 7.3.4 指针和`const`
+
+有两种方式将`const`关键词用于指针。第一种方式是让指针指向一个常量对象，这样可以方式使用该指针来修改所指向的值；第二种方法是将指针本身声明为常量，这样可以防止改变指针指向的位置。比如：
+
+```cpp
+int age = 39;
+const int * pt = &age
+```
+
+该声明指出，`pt`指向一个`const int` （这里是39），因此不能使用`pt`来修改这个值。换句话说，`*pt`的值为`const`，不能修改：
+
+```cpp
+* pt += 1;      // Invalid because pt points to a const int
+cin >> *pt;     // Invalid because pt points to a const int
+```
+
+但这并不意味着，`*pt`的值不会变，当我们改变`age`的值的时候，就会修改`*pt`。
+
+```cpp
+age = 20;
+```
+
+以前我们经常将常规变量的地址赋值给常规的指针，而这里将常规变量的地址赋值给`const`指针。因此还有两种可能：将`const`变量的地址赋值给`const`的指针、及那个`const`的地址给常规的指针。但实际上，只有第一种是可行的。
+
+```cpp
+const float g_earth = 9.81;
+const float * pe = &g_earth;    // VALID
+
+const float g_moon = 1.63;
+float * pm = &g_moon;           // INVALID
+```
+
+对于第一种情况来说，既不能用`g_earth`来修改值9.81，也不能使用`pe`来修改。但是C++中禁止使用第二种情况，因为如果将`g_moon`的地址赋给`pm`，则可以使用`pm`来修改`g_moon`的值，这使得`g_moon`的`const`状态很荒谬。如果指针指向指针，则状态更加的复杂。前面讲过，如果只涉及一级间接关系，则将非`const`指针赋值给`const`指针是可以的：
+
+```cpp
+int age = 39;               // age ++ is a valid operation
+int * pa = &age;            // *pd = 41 is a valid operation
+const int * pb = pa;        // *pt = 42 is an invalid operation
+```
+
+然而进入两级间接关系的时候，与一级间接关系一样，将`const`和非`const`混合的指针赋值方式将不再安全。如果允许这样做，则可以编写这样的代码：
+
+```cpp
+const int **pp2;
+int * p1;
+const int n = 13;
+pp2 = &p1;      //not allowed, but suppose it were
+*pp2 = &n       //valid, both const, but sets p1 to point at n
+*p1 = 10;       //valid but changes const n
+```
+上述的代码，将一个非`const`地址赋值给了一个`const`指针，因此可以使用`p1`来修改`const`数据。
+
+假如有一个由`const`数据组成的数组：
+```cpp
+const int months[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+```
+
+则禁止将常量数组的地址赋给非常量指针，这意味着不能将数组名作为参数传递给使用非常量形参的函数：
+
+```cpp
+int sum(int arr[], int n);  // should have been const int arr[]
+...
+int j = sum(months, 12);    // not allowed
+```
+上述函数调用试图将`const`指针(months)赋值给非`const`指针(arr)，编译器将禁止这样的行为。
+
+因此我们应该尽可能的使用`const`
+将指针参数声明为指向常量数据的指针由两条理由：
+* 专业可以避免由于无意间修改数据导致的编程错误。
+* 使用`const`使得函数能够处理`const`和非`const`实参，否则将只能接受非`const`数据。
+  
+除此之外，还有一个微妙之处：
+```cpp
+int age = 39;
+const int * pt = &age;
+```
+
+上面的声明中`const`可以防止修改`pt`指向的值，而不能防止修改`pt`的值，也就是说，可以及那个一个新地址赋给pt:
+
+```cpp
+int sage = 80;
+pt = &sage;     // okey to poin to anther location
+```
+
+但是仍然不能使用`pt`来修改指向它的值（现在是80）。
+
+第二种使用`const`的方式使得无法修改指针的值：
+
+```cpp
+int sloth = 3;
+const int * ps = &sloth;        // a pointer to const int
+int * const finger = &sloth;    // a const pointer to int
+```
+
+上面的声明中，关键词`const`的位置与之间的不同。这种声明格式使得`finger`只能指向`sloth`，但是允许使用`finger`来修改`sloth`的值。中间的声明不循序使用`ps`来修改`sloth`的值，但是允许将`ps`指向另一个位置。简而言之，`finger`和`* ps `都是`const`，而`*finger`和`ps`不是。
+
+当然还可以声明指向`const`对象的`const`指针：
+```cpp
+double trouble = 2.0E30;
+const double * const stick = &trouble;
+```
+其中，`stick`只能指向`trouble`，而`stick`不能用来修改`trouble`的值。简而言之，`stick`和`&stick`都是`const`。
+
+## 7.4 函数和二维数组
+假设我们要对一个二维数组中的元素求和：
+
+```cpp
+int data [3] [4] = {{1,2,3,4},{9,8,7,6},{2,4,6,8}}; // 三行四列的数组
+int total = sum(data, 3);
+```
+
+那么`sum`的原型是什么样的呢？`data`是一个数组名，该数组有3个元素。第一个元素本身是一个数组，有四个`int`值组成。因此`data`的类型是一个执行由四个`int`组成的数组的指针，因此正确的原型如下：
+
+```cpp
+int sum (int (*ar2)[4], int size );
+```
+
+上面声明中的括号是必不可少的，因为后面要将声明由一个指向`int`的指针组成的数组，而不是由一个指向由4个`int`组成的数组的指针。另外函数的参数不能是数组：`int *ar2[4]`。
+
+另外还有一种格式：
+```cpp
+int sum(int ar2[][4], int size);
+```
+这两种格式的含义完全相同。
+
+上面的两个格式都指出，`ar2`不是数组而是指针。并且可以看出，每一行的元素个数在声明的时候就已经指定了，为4。但是行数并没有指定，没有限制。比如：
+
+```cpp
+int a[100][4];
+int b[6][4];
+...
+int total1 = sum(a, 100);   //sum all of a
+int total2 = sum(b, 6);   //sum all of b
+int total3 = sum(a, 10);   //sum first 10 rows of a 
+int total4 = sum(a+10, 20);   //sum next 20 rows of a
+```
+
+由于参数`ar2`是指向数组的指针，那么我们在定义函数的时候，最好就将`ar2`看作是一个二维数组的名称。下面是一个可行的函数定义：
+
+```cpp
+int sum(int ar2[][4], int size)
+{
+    int total = 0;
+    for (int r = 0; r < size; r++)  // 遍历行
+        for (int c = 0; c < 4; c++) // 遍历列
+            total += ar2[r][c];
+    
+    return total;
+}
+```
+
+下面来总结一下之前提出的概念:
+```cpp
+
+ar2                 //pointer to first row of an array of 4 int
+ar2 +r              // pointer to row r (an array of 4 int)
+*(ar2 + r)          // row r (an array of 4 int, hence the name of an array,
+                    // thus a pointer to the first int in te row, i.e., ar2[r])
+
+*(ar2 + r) + c      // pointer int number c in row r, i.e., ar2[r] + c
+*(*(ar2 + r) + c)   // value of int number c in row r, i.e., ar2[r][c]
+```
+
+在声明`sum()`代码的时候参数`ar2`没有使用`const`因为`ar2`是指向指针的指针。
+
+
+
+
+
+
+
 
