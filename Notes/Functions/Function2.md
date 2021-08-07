@@ -225,6 +225,7 @@ Three-day total: 15 hours, 12 minutes.
 这一次我们要写一个函数，将直角坐标系转换为极坐标。这时我们就需要两个结构，一个用来表示（x，y），另一个表示（d, theta）。值得注意的是，在C++的数学库中，角度单位是弧度制，因此需要使用$\theta = rad*180\degree/\pi $来转换。
 
 <font color = ogrange>例程：</font>
+
 ```cpp
 // strctfun.cpp -- functions with a sturcture argument
 #include <iostream>
@@ -302,3 +303,296 @@ angle = 135.004 degree
 Next two numbers (q to quit): q
 Done.
 ```
+
+<font color = ogrange>程序解释：</font>
+
+值得一提的循环的中的条件。程序中使用的是：
+
+```cpp
+    while (cin >> rpoint.x >> rpoint.y)
+```
+
+`cin`是`istream`类的一个对象。抽取运算符`>>`被设计成使得`cin >> rpoint.x`也是一个`istream`对象。因此，在整个`while`循环中测试表达式的最终结果是`cin`，而`cin`被用于测试表达式中时，将根据输入是否成功，被转换成`bool`值`true`或者`false`。因此在程序中，`cin`期望用户输入两个数字，如果有非数字的输入，则表达式将返回`false`给`while`，导致循环结束。
+
+### 7.6.3 传递结构地址
+
+接着上面的例程，如果为了提高效率，将地址作为形参传递给函数`show_polar`该怎么做呢？
+
+1. 调用函数时，将结构的地址`&ppoint`而不是结构本事`&ppoint`传递给它。
+2. 将形参声明为指向`polar`的指针，即`polar*`类型。由于函数不应该修改结构，因此使用了`const`修饰符。
+3. 由于形参时指针而不是结构，因此应使用间接成员运算符`->`而不是成员运算符`.`。
+
+那么函数就应该修改为：
+
+```cpp
+
+void show_polar (const polar * pda)
+{
+    using namespace std;
+    const double Rag_to_Deg = 57.28577952;
+
+    cout << "distance = " << pda-> distance;
+    cout ", angle = " << pda->angle*Rad_to_Deg;
+    cout << "degrees.\n";
+}
+```
+
+如果是对`rect2polar()`函数进行修改，则是：
+
+```cpp
+void rect2polar(const rect * pxy, polar * pda)
+{
+    using namespace std;
+    pda->distance = sqrt(pow(pxy->x,2)+pxy->y,2);
+    pda->angle = atan2(pxy->y,pxy->x);
+}
+```
+
+主函数的`while loop`中则需要将参数全部修改成地址。
+
+```cpp
+while (cin >> rpoint.x >> rpoint.y)
+{
+    rect2polar(&rpoint,&ppoint);
+    show_polar(&ppoint);
+    cout << "Next two numbers (q to quit); ";>
+}
+```
+
+## 7.7 函数和`string`对象
+
+虽然C-风格字符串与`string`对象的用途几乎相同，但是`string`对象与结构更像。函数中使用`string`的方式，将由一个例程展示：
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// topfive.cpp -- handling an array of string object
+#include <iostream>
+#include <string>
+using namespace std;
+
+const int SIZE = 5;
+void display(const string sa[], int n);
+
+int main(int argc, char const *argv[])
+{
+    string list [SIZE];     // an array olding 5 string object
+    cout << "Enter your " << SIZE << "favorite astronomical sights: \n";
+    for (int i = 0; i < SIZE; i ++)
+    {
+        cout << i + 1<< ": ";
+        getline(cin,list[i]);
+    }
+
+    cout << "Your list: \n";
+    display(list, SIZE);
+
+    return 0;
+}
+
+void display (const string sa[], int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << i + 1 << ": " << sa[i] << endl;
+}
+```
+
+out:
+```
+Enter your 5favorite astronomical sights: 
+1: Orion Nebula
+2: M13
+3: Saturn
+4: Jupiter
+5: Moon
+Your list: 
+1: Orion Nebula
+2: M13
+3: Saturn
+4: Jupiter
+5: Moon
+```
+
+<font color = ogrange>程序说明：</font>
+
+由于形参`sa`是一个指向`string`对象的指针，因此`sa[i]`是一个`string`对象，可以像下面这样使用：
+
+```cpp
+ cout << i + 1 << ": " << sa[i] << endl;
+```
+
+## 7.8 函数与 array 对象
+
+<font color = ogrange>题目：</font>
+写一个程序记录四季的开销
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// arrobj.cpp -- functions with array objects
+
+#include <iostream>
+#include <array>
+#include <string>
+
+// constant data
+
+const int Seasons = 4;
+const std::array<std::string, Seasons> Snames = 
+{"Spring", "Summer", "Fall", "Winter"};
+
+// function to modify array object
+void fill(std::array<double, Seasons> * pa);
+
+// function that uses array object without modifying it
+void show(std::array<double, Seasons> da);
+
+int main(int argc, char const *argv[])
+{
+    std::array<double, Seasons> expenses;
+    fill(&expenses);
+    show(expenses);
+    return 0;
+}
+
+void fill(std::array<double,Seasons> *pa)
+{
+    using namespace std;
+    for (int i = 0; i < Seasons; i++)
+    {
+        cout << "Enter " << Snames[i] << " expenses: ";
+        cin >> (*pa)[i];
+    }
+}
+
+void show(std::array<double, Seasons> da)
+{
+    using namespace std;
+    double total = 0.0;
+    cout << "\nEXPENSES\n";
+    for (int i = 0; i < Seasons; i++)
+    {
+        cout << Snames[i] << ": $" << da[i] <<endl;
+        total +=da[i];
+    }
+    cout << "Total expenses: $" << total << endl;
+}
+```
+
+out:
+```
+Enter Spring expenses: 212
+Enter Summer expenses: 256
+Enter Fall expenses: 208
+Enter Winter expenses: 244
+
+EXPENSES
+Spring: $212
+Summer: $256
+Fall: $208
+Winter: $244
+Total expenses: $920
+```
+
+<font color = ogrange>程序说明：</font>
+
+值得一提的是`pa`是一个指向`array<double, 4>`对象的指针，因此`*pa`为这种对象，而`(*pa)[i]`是该对象的一个元素。由于运算符优先级的影响，其中的括号必不可少。
+
+## 7.9 递归
+
+C++函数有一个有趣的特点 -- 可以调用自己（`main`不可以），这种功能被称为递归。
+
+### 7.9.1 包含一个递归调用的递归
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// recur.cpp -- using recursion 
+# include <iostream>
+void countdown (int n);
+
+int main(int argc, char const *argv[])
+{
+    countdown(4);
+    return 0;
+}
+
+void countdown(int n)
+{
+    using namespace std;
+    cout << "Counting down ... " << n <<endl;
+
+    if (n > 0)
+        countdown(n-1);     // function calls itself
+    cout << n << ": Kaboom!\n";
+}
+```
+
+out:
+```
+Counting down ... 4
+Counting down ... 3
+Counting down ... 2
+Counting down ... 1
+Counting down ... 0
+0: Kaboom!
+1: Kaboom!
+2: Kaboom!
+3: Kaboom!
+4: Kaboom!
+```
+
+<font color = ogrange>程序说明：</font>
+
+首先我们查看输出：`counting down`后面的数字是逐渐减少的，而`kaboom！`前面的数字是递增的。这是因为在输出`counting down`后，函数就进入了自我的调用，因此在`if`条件结束之前，函数会被一直调用。当最后一个函数被调用完，`if`条件失效，程序开始向下进行，从而输出`0: Kaboom!`。这是一个由内向外的过程。
+
+值得注意的是，每一个递归调用会创建自己的一套变量，因此当程序到达第五次调用时，已经有了5个独立的`n`变量。
+
+### 7.9.2 包含多个递归调用的递归
+
+<font color = ogrange>题目：</font>
+
+将一个字符串分别从左右两边进行输入：
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// ruler.cpp -- using recursion to subdivide a ruler
+#include <iostream>
+const int Len = 66;
+const int Divs = 6;
+
+void subdivide(char ar[], int low, int high, int level);
+int main(int argc, char const *argv[])
+{
+    char ruler[Len];
+    int i;
+    for (i = 1; i < Len - 2; i++)
+        ruler[i] = ' ';
+    ruler[Len - 1] = '\0';
+    int max = Len -2;
+    int min = 0;
+    ruler[min] = ruler[max] = '|';
+    std::cout << ruler << std::endl;
+    for (i = 1; i <= Divs; i++)
+    {
+        subdivide(ruler,min,max,i);
+        std::cout << ruler << std::endl;
+        for (int j = 1; j < Len - 2; j++)
+            ruler[j] = ' ';      // reset to blank ruler
+    }
+    return 0;
+}
+
+void subdivide(char ar[], int low, int high, int level)
+{
+    if (level == 0)
+        return;
+    int mid = (high + low) / 2;
+    ar[mid] = '|';
+    subdivide(ar, low, mid, level - 1);
+    subdivide(ar, mid, high, level - 1);
+}
+```
+
+<font color = ogrange>程序说明：</font>
