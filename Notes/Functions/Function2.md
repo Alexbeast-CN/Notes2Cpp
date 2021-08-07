@@ -595,4 +595,142 @@ void subdivide(char ar[], int low, int high, int level)
 }
 ```
 
+out:
+
+```
+|                                                               |
+|                               |                               |
+|               |               |               |               |
+|       |       |       |       |       |       |       |       |
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+```
 <font color = ogrange>程序说明：</font>
+
+程序种中的`subdivide()`函数使用变量`level`来控制递归层级。函数调用自身十，将把`level`减一，当`level`归零的时候，桉树将不再调用自己。注意，`subdivide()`函数会调用自己两次，一次针对左半边，另一次针对右边。最初中点被用作调用的右端点和另一次调用的左端点。调用次数将呈几何级数增长。也就是说，调用一次导致两个调用，然后导致4个调用。因此6个层级可以导致$2^6 = 64$次调用。将64格全部填满。
+
+## 7.10 函数指针
+
+### 7.10.1 基础知识
+
+这里我们将举一个例子来阐释这个过程。需要写一个`estimate()`函数来估算编写指定行数代码的时间，并且希望每个程序员提供自己的算法来估算时间。为了完成这个功能，必须要完成以下工作：
+
+* 获取函数的地址；
+* 声明一个函数指针；
+* 使用函数指针来调用函数。
+
+1. 获取函数的地址
+
+获取函数的地址很简单：只要使用函数名（后面不跟函数）即可。也就是说，如果`think()`是一个函数，则`think`是该函数的地址。要将函数作为参数进行传递，必须传递函数名。一定要区分传递的是函数的地址还是函数的返回值：
+
+```cpp  
+process(think);         // passes address of think() to process()
+thought(think());       // passes return value of think() to thought()
+```
+
+`process()`调用使得`process()`函数能够在其内部调用`think()`函数。`thought()`调用首先调用`think()`函数，然后及那个`think()`的返回值传递给`thought()`函数。
+
+2. 声明函数指针
+
+声明指向某种数据类型的指针时，必须指定指针指向的类型。同样，声明指向函数的指针时，也必须指定指针指向的函数类型。这意味着声明应指定函数的返回类型以及函数的特征表（参数列表）。也就是说，声明应像函数原型那样指出有关函数的信息。例如一个函数原型如下：
+
+```cpp
+double pam(int);    // prototype
+```
+
+则正确的指针类型声明如下：
+
+```cpp
+double (*pf)(int);  // pf points to a function that takes
+                    // one int argument and that
+                    // returns type double
+```
+
+上面的声明中`*pf`是`pam`的替换，因此`(*pf)`也是函数，则`pf`就是函数指针。
+
+需要注意的是，要为声明提供正确的运算符优先级，必须在声明中使用括号将`*pf`扩起。括号的优先级比*运算符高，因此`*pf（int)`意味着`pf()`是一个返回指针的函数，而`(*pf)(int)`意味着`pf`是一个指向函数的指针：
+
+```cpp
+double (*pf)(int);  // pf points to a function that returns double
+double *pf(int);    // pf() a function that returns a pointer-to-double
+```
+
+正确的声明`pf`后，还应该将相应的地址赋予它：
+```cpp
+double pam(int);
+double (*pf)(int);
+pf = pam;
+```
+
+3. 使用指针来调用函数
+
+前面讲过，`(*pf)`扮演的角色是与函数名相同，因此需要使用`(*pf)`时，只需要将它看作函数名即可：
+
+```cpp
+double pam(int);
+double (*pf)(int);
+pf = pam;               // pf now points to the pam() function
+double x = pam(4);      // call pam() using the function name
+double y = (*pf)(5);    // call pam() using the pointer pf
+```
+
+实际上，C++可以直接使用`pf`：
+```cpp
+double y = pf(5);   // also call pam() using the pointer pf
+```
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// fun_prt.cpp -- pointers to functions
+#include <iostream>
+double betsy(int);
+double pam(int);
+
+// second argument is pointer to a type double function that
+// takes a type int argument
+void estimate (int lines, double (*pf)(int));
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    int code;
+    cout << "How many lines of code do you need?\n";
+    cin >> code;
+    cout << "Here's Betsy's estimate: \n";
+    estimate(code,betsy);
+    cout << "Here's pam's estimate: \n";
+    estimate(code,pam);
+    return 0;
+}
+
+double betsy (int lns)
+{
+    return 0.05 * lns;
+}
+
+double pam (int lns)
+{
+    return 0.03 * lns + 0.0004 * lns * lns;
+}
+
+void estimate (int lines, double (*pf)(int))
+{
+    using namespace std;
+    cout << lines << "lines will take ";
+    cout << (*pf)(lines) << " hours(s)\n";
+}
+```
+
+out:
+```
+How many lines of code do you need?
+30
+Here's Betsy's estimate: 
+30lines will take 1.5 hours(s)
+Here's pam's estimate:
+30lines will take 1.26 hours(s)
+```
+
+### 7.10.2 输入探讨函数指针
