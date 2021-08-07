@@ -100,7 +100,16 @@
     - [7.5.2 返回C-风格字符串的函数](#752-返回c-风格字符串的函数)
   - [7.6 函数和结构](#76-函数和结构)
     - [7.6.1 传递和返回结构](#761-传递和返回结构)
-    - [7.6.3 另一个处理结构的函数示例：](#763-另一个处理结构的函数示例)
+    - [7.6.2 另一个处理结构的函数示例：](#762-另一个处理结构的函数示例)
+    - [7.6.3 传递结构地址](#763-传递结构地址)
+  - [7.7 函数和`string`对象](#77-函数和string对象)
+  - [7.8 函数与 array 对象](#78-函数与-array-对象)
+  - [7.9 递归](#79-递归)
+    - [7.9.1 包含一个递归调用的递归](#791-包含一个递归调用的递归)
+    - [7.9.2 包含多个递归调用的递归](#792-包含多个递归调用的递归)
+  - [7.10 函数指针](#710-函数指针)
+    - [7.10.1 基础知识](#7101-基础知识)
+    - [7.10.2 输入探讨函数指针](#7102-输入探讨函数指针)
 ---
 # 第二章：开始学习C++ 
 
@@ -3059,6 +3068,7 @@ Three-day total: 15 hours, 12 minutes.
 这一次我们要写一个函数，将直角坐标系转换为极坐标。这时我们就需要两个结构，一个用来表示（x，y），另一个表示（d, theta）。值得注意的是，在C++的数学库中，角度单位是弧度制，因此需要使用$\theta = rad*180\degree/\pi $来转换。
 
 <font color = ogrange>例程：</font>
+
 ```cpp
 // strctfun.cpp -- functions with a sturcture argument
 #include <iostream>
@@ -3136,3 +3146,434 @@ angle = 135.004 degree
 Next two numbers (q to quit): q
 Done.
 ```
+
+<font color = ogrange>程序解释：</font>
+
+值得一提的循环的中的条件。程序中使用的是：
+
+```cpp
+    while (cin >> rpoint.x >> rpoint.y)
+```
+
+`cin`是`istream`类的一个对象。抽取运算符`>>`被设计成使得`cin >> rpoint.x`也是一个`istream`对象。因此，在整个`while`循环中测试表达式的最终结果是`cin`，而`cin`被用于测试表达式中时，将根据输入是否成功，被转换成`bool`值`true`或者`false`。因此在程序中，`cin`期望用户输入两个数字，如果有非数字的输入，则表达式将返回`false`给`while`，导致循环结束。
+
+### 7.6.3 传递结构地址
+
+接着上面的例程，如果为了提高效率，将地址作为形参传递给函数`show_polar`该怎么做呢？
+
+1. 调用函数时，将结构的地址`&ppoint`而不是结构本事`&ppoint`传递给它。
+2. 将形参声明为指向`polar`的指针，即`polar*`类型。由于函数不应该修改结构，因此使用了`const`修饰符。
+3. 由于形参时指针而不是结构，因此应使用间接成员运算符`->`而不是成员运算符`.`。
+
+那么函数就应该修改为：
+
+```cpp
+
+void show_polar (const polar * pda)
+{
+    using namespace std;
+    const double Rag_to_Deg = 57.28577952;
+
+    cout << "distance = " << pda-> distance;
+    cout ", angle = " << pda->angle*Rad_to_Deg;
+    cout << "degrees.\n";
+}
+```
+
+如果是对`rect2polar()`函数进行修改，则是：
+
+```cpp
+void rect2polar(const rect * pxy, polar * pda)
+{
+    using namespace std;
+    pda->distance = sqrt(pow(pxy->x,2)+pxy->y,2);
+    pda->angle = atan2(pxy->y,pxy->x);
+}
+```
+
+主函数的`while loop`中则需要将参数全部修改成地址。
+
+```cpp
+while (cin >> rpoint.x >> rpoint.y)
+{
+    rect2polar(&rpoint,&ppoint);
+    show_polar(&ppoint);
+    cout << "Next two numbers (q to quit); ";>
+}
+```
+
+## 7.7 函数和`string`对象
+
+虽然C-风格字符串与`string`对象的用途几乎相同，但是`string`对象与结构更像。函数中使用`string`的方式，将由一个例程展示：
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// topfive.cpp -- handling an array of string object
+#include <iostream>
+#include <string>
+using namespace std;
+
+const int SIZE = 5;
+void display(const string sa[], int n);
+
+int main(int argc, char const *argv[])
+{
+    string list [SIZE];     // an array olding 5 string object
+    cout << "Enter your " << SIZE << "favorite astronomical sights: \n";
+    for (int i = 0; i < SIZE; i ++)
+    {
+        cout << i + 1<< ": ";
+        getline(cin,list[i]);
+    }
+
+    cout << "Your list: \n";
+    display(list, SIZE);
+
+    return 0;
+}
+
+void display (const string sa[], int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << i + 1 << ": " << sa[i] << endl;
+}
+```
+
+out:
+```
+Enter your 5favorite astronomical sights: 
+1: Orion Nebula
+2: M13
+3: Saturn
+4: Jupiter
+5: Moon
+Your list: 
+1: Orion Nebula
+2: M13
+3: Saturn
+4: Jupiter
+5: Moon
+```
+
+<font color = ogrange>程序说明：</font>
+
+由于形参`sa`是一个指向`string`对象的指针，因此`sa[i]`是一个`string`对象，可以像下面这样使用：
+
+```cpp
+ cout << i + 1 << ": " << sa[i] << endl;
+```
+
+## 7.8 函数与 array 对象
+
+<font color = ogrange>题目：</font>
+写一个程序记录四季的开销
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// arrobj.cpp -- functions with array objects
+
+#include <iostream>
+#include <array>
+#include <string>
+
+// constant data
+
+const int Seasons = 4;
+const std::array<std::string, Seasons> Snames = 
+{"Spring", "Summer", "Fall", "Winter"};
+
+// function to modify array object
+void fill(std::array<double, Seasons> * pa);
+
+// function that uses array object without modifying it
+void show(std::array<double, Seasons> da);
+
+int main(int argc, char const *argv[])
+{
+    std::array<double, Seasons> expenses;
+    fill(&expenses);
+    show(expenses);
+    return 0;
+}
+
+void fill(std::array<double,Seasons> *pa)
+{
+    using namespace std;
+    for (int i = 0; i < Seasons; i++)
+    {
+        cout << "Enter " << Snames[i] << " expenses: ";
+        cin >> (*pa)[i];
+    }
+}
+
+void show(std::array<double, Seasons> da)
+{
+    using namespace std;
+    double total = 0.0;
+    cout << "\nEXPENSES\n";
+    for (int i = 0; i < Seasons; i++)
+    {
+        cout << Snames[i] << ": $" << da[i] <<endl;
+        total +=da[i];
+    }
+    cout << "Total expenses: $" << total << endl;
+}
+```
+
+out:
+```
+Enter Spring expenses: 212
+Enter Summer expenses: 256
+Enter Fall expenses: 208
+Enter Winter expenses: 244
+
+EXPENSES
+Spring: $212
+Summer: $256
+Fall: $208
+Winter: $244
+Total expenses: $920
+```
+
+<font color = ogrange>程序说明：</font>
+
+值得一提的是`pa`是一个指向`array<double, 4>`对象的指针，因此`*pa`为这种对象，而`(*pa)[i]`是该对象的一个元素。由于运算符优先级的影响，其中的括号必不可少。
+
+## 7.9 递归
+
+C++函数有一个有趣的特点 -- 可以调用自己（`main`不可以），这种功能被称为递归。
+
+### 7.9.1 包含一个递归调用的递归
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// recur.cpp -- using recursion 
+# include <iostream>
+void countdown (int n);
+
+int main(int argc, char const *argv[])
+{
+    countdown(4);
+    return 0;
+}
+
+void countdown(int n)
+{
+    using namespace std;
+    cout << "Counting down ... " << n <<endl;
+
+    if (n > 0)
+        countdown(n-1);     // function calls itself
+    cout << n << ": Kaboom!\n";
+}
+```
+
+out:
+```
+Counting down ... 4
+Counting down ... 3
+Counting down ... 2
+Counting down ... 1
+Counting down ... 0
+0: Kaboom!
+1: Kaboom!
+2: Kaboom!
+3: Kaboom!
+4: Kaboom!
+```
+
+<font color = ogrange>程序说明：</font>
+
+首先我们查看输出：`counting down`后面的数字是逐渐减少的，而`kaboom！`前面的数字是递增的。这是因为在输出`counting down`后，函数就进入了自我的调用，因此在`if`条件结束之前，函数会被一直调用。当最后一个函数被调用完，`if`条件失效，程序开始向下进行，从而输出`0: Kaboom!`。这是一个由内向外的过程。
+
+值得注意的是，每一个递归调用会创建自己的一套变量，因此当程序到达第五次调用时，已经有了5个独立的`n`变量。
+
+### 7.9.2 包含多个递归调用的递归
+
+<font color = ogrange>题目：</font>
+
+将一个字符串分别从左右两边进行输入：
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// ruler.cpp -- using recursion to subdivide a ruler
+#include <iostream>
+const int Len = 66;
+const int Divs = 6;
+
+void subdivide(char ar[], int low, int high, int level);
+int main(int argc, char const *argv[])
+{
+    char ruler[Len];
+    int i;
+    for (i = 1; i < Len - 2; i++)
+        ruler[i] = ' ';
+    ruler[Len - 1] = '\0';
+    int max = Len -2;
+    int min = 0;
+    ruler[min] = ruler[max] = '|';
+    std::cout << ruler << std::endl;
+    for (i = 1; i <= Divs; i++)
+    {
+        subdivide(ruler,min,max,i);
+        std::cout << ruler << std::endl;
+        for (int j = 1; j < Len - 2; j++)
+            ruler[j] = ' ';      // reset to blank ruler
+    }
+    return 0;
+}
+
+void subdivide(char ar[], int low, int high, int level)
+{
+    if (level == 0)
+        return;
+    int mid = (high + low) / 2;
+    ar[mid] = '|';
+    subdivide(ar, low, mid, level - 1);
+    subdivide(ar, mid, high, level - 1);
+}
+```
+
+out:
+
+```
+|                                                               |
+|                               |                               |
+|               |               |               |               |
+|       |       |       |       |       |       |       |       |
+|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+```
+<font color = ogrange>程序说明：</font>
+
+程序种中的`subdivide()`函数使用变量`level`来控制递归层级。函数调用自身十，将把`level`减一，当`level`归零的时候，桉树将不再调用自己。注意，`subdivide()`函数会调用自己两次，一次针对左半边，另一次针对右边。最初中点被用作调用的右端点和另一次调用的左端点。调用次数将呈几何级数增长。也就是说，调用一次导致两个调用，然后导致4个调用。因此6个层级可以导致$2^6 = 64$次调用。将64格全部填满。
+
+## 7.10 函数指针
+
+### 7.10.1 基础知识
+
+这里我们将举一个例子来阐释这个过程。需要写一个`estimate()`函数来估算编写指定行数代码的时间，并且希望每个程序员提供自己的算法来估算时间。为了完成这个功能，必须要完成以下工作：
+
+* 获取函数的地址；
+* 声明一个函数指针；
+* 使用函数指针来调用函数。
+
+1. 获取函数的地址
+
+获取函数的地址很简单：只要使用函数名（后面不跟函数）即可。也就是说，如果`think()`是一个函数，则`think`是该函数的地址。要将函数作为参数进行传递，必须传递函数名。一定要区分传递的是函数的地址还是函数的返回值：
+
+```cpp  
+process(think);         // passes address of think() to process()
+thought(think());       // passes return value of think() to thought()
+```
+
+`process()`调用使得`process()`函数能够在其内部调用`think()`函数。`thought()`调用首先调用`think()`函数，然后及那个`think()`的返回值传递给`thought()`函数。
+
+2. 声明函数指针
+
+声明指向某种数据类型的指针时，必须指定指针指向的类型。同样，声明指向函数的指针时，也必须指定指针指向的函数类型。这意味着声明应指定函数的返回类型以及函数的特征表（参数列表）。也就是说，声明应像函数原型那样指出有关函数的信息。例如一个函数原型如下：
+
+```cpp
+double pam(int);    // prototype
+```
+
+则正确的指针类型声明如下：
+
+```cpp
+double (*pf)(int);  // pf points to a function that takes
+                    // one int argument and that
+                    // returns type double
+```
+
+上面的声明中`*pf`是`pam`的替换，因此`(*pf)`也是函数，则`pf`就是函数指针。
+
+需要注意的是，要为声明提供正确的运算符优先级，必须在声明中使用括号将`*pf`扩起。括号的优先级比*运算符高，因此`*pf（int)`意味着`pf()`是一个返回指针的函数，而`(*pf)(int)`意味着`pf`是一个指向函数的指针：
+
+```cpp
+double (*pf)(int);  // pf points to a function that returns double
+double *pf(int);    // pf() a function that returns a pointer-to-double
+```
+
+正确的声明`pf`后，还应该将相应的地址赋予它：
+```cpp
+double pam(int);
+double (*pf)(int);
+pf = pam;
+```
+
+3. 使用指针来调用函数
+
+前面讲过，`(*pf)`扮演的角色是与函数名相同，因此需要使用`(*pf)`时，只需要将它看作函数名即可：
+
+```cpp
+double pam(int);
+double (*pf)(int);
+pf = pam;               // pf now points to the pam() function
+double x = pam(4);      // call pam() using the function name
+double y = (*pf)(5);    // call pam() using the pointer pf
+```
+
+实际上，C++可以直接使用`pf`：
+```cpp
+double y = pf(5);   // also call pam() using the pointer pf
+```
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// fun_prt.cpp -- pointers to functions
+#include <iostream>
+double betsy(int);
+double pam(int);
+
+// second argument is pointer to a type double function that
+// takes a type int argument
+void estimate (int lines, double (*pf)(int));
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    int code;
+    cout << "How many lines of code do you need?\n";
+    cin >> code;
+    cout << "Here's Betsy's estimate: \n";
+    estimate(code,betsy);
+    cout << "Here's pam's estimate: \n";
+    estimate(code,pam);
+    return 0;
+}
+
+double betsy (int lns)
+{
+    return 0.05 * lns;
+}
+
+double pam (int lns)
+{
+    return 0.03 * lns + 0.0004 * lns * lns;
+}
+
+void estimate (int lines, double (*pf)(int))
+{
+    using namespace std;
+    cout << lines << "lines will take ";
+    cout << (*pf)(lines) << " hours(s)\n";
+}
+```
+
+out:
+```
+How many lines of code do you need?
+30
+Here's Betsy's estimate: 
+30lines will take 1.5 hours(s)
+Here's pam's estimate:
+30lines will take 1.26 hours(s)
+```
+
+### 7.10.2 输入探讨函数指针
