@@ -134,3 +134,171 @@ VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 ++++++++++++++++++++-DONE-++++++++++++++++++++
 ```
 
+<font color = ogrange> 程序说明：</font>
+
+首先，我们在创建一个包含n个字符的字符串的时候，需要能够储存`n+1`个字符的空间，以便能够储存空字符。然后程序中选择从后往前对字符串进行填充。下面的代码将循环n次，直到减少到0。
+
+```cpp
+while (n-- > 0)
+    pstr[n] = c;
+```
+
+在最后一轮的循环开始时，n的值为1.由于`n--`意味着先使用这个值，然后对其递减，因此`while`循环测试条件将对1和0进行比较，发现测试为`true`，循环继续，然后将`n`减少为0，因此`pstr[0]`时最后一个被填充的元素。
+
+## 7.6 函数和结构
+
+函数与结构相比数组要简单，因为可以直接传入和返回。
+
+### 7.6.1 传递和返回结构
+
+<font color = ogrange>例程：</font>
+
+```cpp
+// travel.cpp -- using structures with functions
+#include <iostream>
+
+struct travel_time
+{
+    int hours;
+    int mins;
+};
+const int Mins_per_hr = 60;
+
+travel_time sum(travel_time t1, travel_time t2);
+void show_time(travel_time t);
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    travel_time day1 = {5, 45};         // 5 hrs, 45 mins
+    travel_time day2 = {4, 55};         // 4 hrs, 45 mins
+
+    travel_time trip = sum(day1, day2);
+    cout << "Two-day total: ";
+    show_time(trip);
+
+    travel_time day3 = {4, 32};
+    cout << "Three-day total: ";
+    show_time(sum(trip,day3));
+
+    return 0;
+}
+
+travel_time sum(travel_time t1, travel_time t2)
+{
+    travel_time total;
+
+    total.mins = (t1.mins + t2.mins) % Mins_per_hr;
+    total.hours = (t1.hours + t2.hours) + 
+    (t1.mins + t2.mins) / Mins_per_hr;
+
+    return total;
+}
+
+void show_time (travel_time t)
+{
+    using namespace std;
+    cout << t.hours << " hours, "
+    << t.mins << " minutes.\n";
+}
+```
+
+out:
+```
+Two-day total: 10 hours, 40 minutes.
+Three-day total: 15 hours, 12 minutes.
+```
+
+<font color = ogrange>程序说明：</font>
+
+1. 首先我们来看一下`sum()`函数。在函数原型的时候，这个函数与以前的原型不太类似：
+   ```cpp
+   travel_time sum (travel_time t1, travel_time t2);
+   ```
+   函数返回值的类型是`travel_time`结构，参数也是2个这种结构的变量。
+
+2. 在程序中，我们可以把`travel_time`当作一个标准的类型名，它既可以用来声明变量，也可以声明函数返回类型和函数的参数类型。由于`sum()`返回值是`travel_time`结构，因此我们也可以将其作为`show_time()`的参数。
+
+### 7.6.3 另一个处理结构的函数示例：
+
+<font color = ogrange>题目：</font>
+这一次我们要写一个函数，将直角坐标系转换为极坐标。这时我们就需要两个结构，一个用来表示（x，y），另一个表示（d, theta）。值得注意的是，在C++的数学库中，角度单位是弧度制，因此需要使用$\theta = rad*180\degree/\pi $来转换。
+
+<font color = ogrange>例程：</font>
+```cpp
+// strctfun.cpp -- functions with a sturcture argument
+#include <iostream>
+#include <cmath>
+
+// structure delarations
+struct polar
+{
+    double distance;
+    double angle;
+};
+
+struct rect
+{
+    double x;
+    double y;
+};
+
+// prototypes
+polar rect2polar(rect xypos);
+void show_polar(polar dapos);
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    rect rpoint;
+    polar ppoint;
+
+    cout << "Enter the x and y values: ";
+    while (cin >> rpoint.x >> rpoint.y)
+    {
+        ppoint = rect2polar(rpoint);
+        show_polar(ppoint);
+        cout << "Next two numbers (q to quit): ";
+    }
+
+    cout << "Done. \n";
+    return 0;
+}
+
+// convert rectangular to polar coordinates
+polar rect2polar(rect xypos)
+{
+    using namespace std;
+    polar answer;
+
+    answer.distance =
+        sqrt(pow(xypos.x, 2) + pow(xypos.y, 2));
+
+    answer.angle = atan2(xypos.y, xypos.x);
+
+    return answer;
+}
+
+// show polar coordinates, coverting angle to degrees
+void show_polar(polar dapos)
+{
+    using namespace std;
+    const double rad_to_deg = 180 / 3.1415;
+
+    cout << "distance = " << dapos.distance << endl;
+    cout << "angle = " << dapos.angle * rad_to_deg;
+    cout << " degree\n";
+}
+```
+
+out:
+```
+Enter the x and y values: 30 40
+distance = 50
+angle = 53.1317 degree
+Next two numbers (q to quit): -100 100
+distance = 141.421
+angle = 135.004 degree
+Next two numbers (q to quit): q
+Done.
+```
