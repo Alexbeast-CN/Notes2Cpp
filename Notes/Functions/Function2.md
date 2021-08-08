@@ -734,3 +734,73 @@ Here's pam's estimate:
 ```
 
 ### 7.10.2 输入探讨函数指针
+
+首先来展示一些函数的原型，他们的特征标和返回类型相同：
+
+```cpp
+const double * f1(const double ar[  ], int n);
+const double * f2(const double [], int);
+const double * f3(const double *, int);
+```
+
+上面的原型中，`const double ar[]`可以简化为`const double []`，`int n` 可以简化为`int`。由于`*ar`与`ar[]`所代表的意义相同，因此也可以将`*ar`简化为`*`。
+
+接下来，假设要声明一个指针指向这三个函数之一。
+
+```cpp
+const double *(*pa)(const double *,int);
+```
+
+当然声明的同时也可以进行初始化：
+
+```cpp
+const double *(*pa)(const double *,int) = f1;
+```
+
+使用C++的自动类推断，代码会更加简单：
+
+```cpp
+auto p2 = f2;
+```
+
+再看下面的代码：
+
+```cpp
+cout << (*p1)(av,3) << ": " << *(*p1)(av,3) << endl;
+cout << p2(av,3) << ": " << *p2(av,3) << endl;
+```
+
+上面代码的前半部分输出的都是一个`double`类型的地址，后半部分是`double`的数值。
+
+既然我们在上面声明了三个函数，那么有没有用一个指针数组来调用三个函数呢？答案是有的：
+```cpp
+const double * (*pa[3])(const double *, int) = {f1, f2, f2};
+```
+首先，`pa`是一个包含三个元素的数组，所以其后要跟一个`[]`，由于`[]`的优先级大于`*`，所以`*pa[3]`表示的是一个包含三个指针的数组。`const double *`是特征标，表示返回值是一个`const double *`类型。那么如何调用这个函数呢？
+
+```cpp
+const double * px = pa[0](av,3);
+```
+
+要想获取指向`double`的值，可使用运算符`*`
+
+```cpp
+double x = *pa[0](av,3);
+```
+
+>说实话，指针真的太恶心了。一层又一层的无限套娃啊。暂时跳过了，读不下去了
+
+### 7.10.3 使用 typedef 进行简化
+
+除了`auto`以外，还可以使用`typedef`进行简化：
+
+```cpp
+typedef double real;    // makes real another name for double
+```
+
+这里将上面说的函数指针类型进行`typedef`:
+
+```cpp
+typedef const double * (*p_fun)(const double *, int);       // p_fun now a type name
+p_fun p1 = f1;                                              // p1 points to the f1() function
+```
