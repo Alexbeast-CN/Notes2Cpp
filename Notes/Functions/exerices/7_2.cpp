@@ -5,7 +5,7 @@ const int N = 10;
 // prototypes
 int fill_table(double *);
 void display(const double *, int);
-void mean(const double *, int);
+void mean(double *, int);
 
 using namespace std;
 
@@ -41,11 +41,11 @@ void display(const double *ar, int i)
     cout << endl;
 }
 
-void mean(const double *ar, int i)
+void mean(double * arr, int i)
 {
     double sum = 0;
     for (int j = 0; j < i; j++)
-        sum += ar[j];
+        sum += arr[j];
     double mean = sum / i;
     cout << "The mean of the results is: " << mean << endl;
 }
