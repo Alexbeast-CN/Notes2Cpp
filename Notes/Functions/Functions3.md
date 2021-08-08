@@ -222,3 +222,218 @@ length 3.5
 volume 21
 
 ```
+
+## 第四题
+
+<font color = #FFA500>题目：</font>
+
+定义一个递归函数，接受一个整数参数，并返回该参数的阶乘。通用的公式是，如果n大于零，则 $n! = n(n-1)!$。在程序中对该函数进行测试，程序使用循环让用户输入不同的值，程序报告这些值的阶乘。
+
+<font color = #FFA500>程序：</font>
+
+```cpp
+#include <iostream>
+
+uint16_t factorial(uint16_t n);
+
+using namespace std;
+
+int main(int argc, char const *argv[])
+{
+    uint16_t n;
+    cout << "Enter a nature number: ";
+    while (cin >> n)
+    {
+        int n2 = factorial(n);
+        cout << n << "! = " << n2 << endl;
+        cout << "Enter another number (q to quit): ";
+    }
+
+    cout << "-Done-\n";
+    return 0;
+}
+
+uint16_t factorial(uint16_t n)
+{
+    if (n == 0)
+        return 1;
+
+    return n * factorial(n - 1);
+}
+
+```
+
+<font color = #FFA500>结果：</font>
+
+```cpp
+Enter a nature number: 3
+3! = 6
+Enter another number (q to quit): 4
+4! = 24
+Enter another number (q to quit): 7
+7! = 5040
+Enter another number (q to quit): 1
+1! = 1
+Enter another number (q to quit): 3
+3! = 6
+Enter another number (q to quit): 0
+0! = 1
+Enter another number (q to quit): 1
+1! = 1
+Enter another number (q to quit): q
+-Done-
+```
+
+## 第五题
+
+<font color = #FFA500>题目：</font>
+
+编写一个程序，使用下列函数：
+1. `Fill_array()`将一个`double`数组的名称和长度作为参数。它提示用户输入`double`值，并将这些值存储到数组中。当函数被填满或用户输入非数字时，输入将停止，并返回实际输入了多少数字。
+2. `Show_array()`将一个`double`数组的名称和长度作为参数，并显示该数组的内容。
+3. `Reverse-array()`将一个数组的名称和长度作为参数，并将存储在数组中的值的顺序反转。
+
+<font color = #FFA500>程序：</font>
+
+```cpp
+#include <iostream>
+
+const int Len = 10;
+
+int Fill_array(double*);
+void Show_array(double*, int);
+void Reverse_array(double*, int);
+
+using namespace std;
+
+int main(int argc, char const *argv[])
+{
+    double array[Len] = {0};
+    int i = 0;
+    cout << "Enter a array: ";
+    i = Fill_array(array);
+    cout << endl;
+    cout << "The array is: [";
+    Show_array(array, i);
+    cout << "]";
+    cout << endl;
+    cout << "\nThe inverse array is: [";
+    Reverse_array(array, i);
+    cout << "]";
+    return 0;
+}
+
+int Fill_array(double* ar)
+{
+    int j = 0;
+    while(cin.peek()!='\n')
+    {   
+        cin >> ar[j];
+        j++;  
+    }
+        
+    return j;
+}
+void Show_array(double* ar, int n)
+{
+    int j;
+    for (j = 0; j < n; j++)
+        cout << ar[j] << " ";
+}
+void Reverse_array(double* ar, int n)
+{
+    int m = n-1;
+    for (m; m >= 0; m--)
+        cout << ar[m] << " ";
+}
+```
+
+<font color = #FFA500>结果：</font>
+
+Enter a array: 2 8 9 3 10 0
+
+The array is: [2 8 9 3 10 0 ]
+
+The inverse array is: [0 10 3 9 8 2 ]
+
+## 第六题
+
+<font color = #FFA500>题目：</font>
+
+设计一个名为`calculate()`的函数，它接受两个`double`值和一个指向函数的指针，而被指向的函数接受两个`double`值，并返回以`double`值。`calculate()`函数的类型也是`double`，并返回值被指向的函数使用`calculate()`的两个`double`参数计算得到的值。假如，假设`add()`函数的定义如下：
+
+```cpp
+double add (double x, double y)
+{
+    return x + y;
+}
+```
+
+则下述代码中的函数调用导致`calculate()`把2.5和10.4传递给`add()`函数，并返回`add()`的返回值（12.9）：
+```cpp
+double q = calculate(2.5, 10.4, add);
+```
+
+<font color = #FFA500>程序：</font>
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+typedef double (*pfunc)(double, double);
+
+double add(double, double);
+double mul(double, double);
+double calculate(double, double, pfunc);
+
+int main(void)
+{
+    double x, y;
+    pfunc pfun_arr[2] = {add, mul};
+
+    cout << "Enter 2 floats: ";
+    while((cin >> x) >> y)
+    {
+        double res;
+        for(int i = 0; i < 2; ++i)
+        {
+            res = calculate(x, y, pfun_arr[i]);
+            cout << "result #" << i << ": " << res << endl;
+        }
+            cout << "Enter 2 floats again: " << endl;
+
+    }
+    return 0;
+}
+
+double add(double x, double y)
+{
+    return x + y;
+}
+
+double mul(double x, double y)
+{
+    return x*y;
+}
+
+double calculate(double x, double y, pfunc pf)
+{
+    return (*pf)(x, y);
+}
+```
+
+<font color = #FFA500>结果：</font>
+
+```
+Enter 2 floats: 1.2 4.2
+result #0: 5.4        
+result #1: 5.04       
+Enter 2 floats again: 
+1  
+2
+result #0: 3
+result #1: 2
+Enter 2 floats again:
+q
+```
