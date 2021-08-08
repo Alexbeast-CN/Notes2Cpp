@@ -1,6 +1,8 @@
 # 第七章：函数（练习题）
 
-## 第一题：
+## 7.11 练习题
+
+### 7.11.1 第一题：
 
 <font color = #FFA500>题目：</font>
 
@@ -59,7 +61,7 @@ please enter another two positive numbers:
 -Done-
 ```
 
-## 第二题：
+### 7.11.2 第二题：
 
 <font color = #FFA500>题目：</font>
 
@@ -137,7 +139,7 @@ The results are:
 The mean of the results is: 5.5
 ```
 
-## 第三题
+### 7.11.3 第三题
 
 <font color = #FFA500>题目：</font>
 
@@ -223,7 +225,7 @@ volume 21
 
 ```
 
-## 第四题
+### 7.11.4 第四题
 
 <font color = #FFA500>题目：</font>
 
@@ -284,7 +286,7 @@ Enter another number (q to quit): q
 -Done-
 ```
 
-## 第五题
+### 7.11.5 第五题
 
 <font color = #FFA500>题目：</font>
 
@@ -356,7 +358,7 @@ The array is: [2 8 9 3 10 0 ]
 
 The inverse array is: [0 10 3 9 8 2 ]
 
-## 第六题
+### 7.11.6 第六题
 
 <font color = #FFA500>题目：</font>
 
