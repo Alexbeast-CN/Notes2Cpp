@@ -1,4 +1,4 @@
-# 第八章 函数探幽
+# 第八章 函数探幽 （上）
 
 ## 8.1 C++ 内联函数
 
@@ -333,12 +333,13 @@ double c7 = refcube(side + 1);  // ra is temporary varible
 #include <string>
 struct free_throws
 {
-    std::string name;
-    int made;
-    int attempts;
-    float percent;
+    std::string name;   // 名字
+    int made;           // 成功的次数
+    int attempts;       // 尝试的次数
+    float percent;      // 命中率
 };
 
+// 显示队伍中的每项指标
 void display(const free_throws & ft)
 {
     using std::cout;
@@ -348,6 +349,7 @@ void display(const free_throws & ft)
     cout << "Percent: " << ft.percent << "\n";
 }
 
+// 计算命中率
 void set_pc(free_throws & ft)
 {
     if (ft.attempts != 0)
@@ -356,6 +358,7 @@ void set_pc(free_throws & ft)
         ft.percent = 0;
 }
 
+// 累计
 free_throws & accumulate(free_throws & target, const free_throws & source)
 {
     target.attempts += source.attempts;
@@ -367,6 +370,7 @@ free_throws & accumulate(free_throws & target, const free_throws & source)
 int main(int argc, char const *argv[])
 {
     // partial initializations -- remaining members set to 0
+    // 设置了部分结构成分的初始化，命中率初始化为0
     free_throws one = {"Ifelsa Branch", 13, 14};
     free_throws two = {"Andor Knott", 10, 16};
     free_throws three = {"Minnie Max", 7, 9};
@@ -375,19 +379,28 @@ int main(int argc, char const *argv[])
     free_throws team = {"Throwgoods", 0 ,0};
 
     // no initialization
+    // 没有对dup进行初始化
     free_throws dup;
 
+    // 计算队员1 的命中率
     set_pc(one);
+    // 显示队员1 的各项指标
     display(one);
+    // 将队员1 的指标添加到整个队伍
     accumulate(team, one);
+    // 显示整个队伍的各项指标
     display(team);
 
     // use return value as argument
+    // 将队员2 的指标添加到队伍并展示
     display(accumulate(team,two));
+    // 将队员3 和 4 的指标添加到队伍
     accumulate(accumulate(team,three),four);
+    // 显示整个队伍的各项指标
     display(team);
 
     // use return value in assigment
+    // accumulate 的返回值是一个结构，因此dup 接收了整个队伍的结构数据
     dup = accumulate(team,five);
     std::cout << "Displaying team:\n";
     display(team);
@@ -424,3 +437,271 @@ Displaying dup after ill-advised assignment:
 Name: Whily Looper
 Made: 5 Attempts: 9     Percent: 55.5556
 ```
+
+<font color = oragne>讨论：</font>
+
+1. 为何要返回引用
+
+我们来看一下上面程序中的一个语句：
+
+```cpp
+dup = accumulate(team, five);
+```
+
+我们知道`acuumulate()`返回的是一个指向结构的引用，这相当于在使用的过程中直接把`team`赋值到`dup`。假如我们使用的返回值是结构，那么我们需要将结构赋值到一个临时的位置，再将其赋值给`dup`。
+
+2. 返回引用时需要注意的问题
+
+返回引用时最重要的一点是，应该避免返回函数终止时不再存在内存单元引用。我们应该避免编写下面的代码：
+
+```cpp
+const free_throw & conle2(free_throws & ft)
+{
+    free_throw newguy;  // first step to big error
+    newguy = ft;        // copy info
+    return newguy;      // return reference to copy
+}
+```
+
+该函数返回一个指向临时变量`newguy`的引用，但是再函数运行完毕后它将不复存在。为了避免这样的现象，可以使用`new`为字符串分配内存空间，并返回指向该内存空间的指针。例如：
+
+```cpp
+const free_throws & clone (feee_thorws & ft)
+{
+    free_throws * pt;
+    pt* = ft;       // copy info
+    return *pt;     // return reference to copy
+}
+```
+
+第一个语句创建了一个无名的`free_throws`结构，并让指针`pt`指向该结构，因此`*pt`就是该结构。上述代码似乎会返回该结构，但是函数声明表明，该函数实际上将返回这个结构的引用。因此，便可以这样使用该函数：
+
+```cpp
+free_throws & jolly = clone(three);
+```
+
+这使得`jolly`称为了新结构的引用。这种方法存在一个问题：再不需要使用`new`分配的内存的时候，应该使用`delete`来释放它们。调用`clone()`隐藏了对`new`的嗲用，这使得以后会容易忘记使用`delete`来释放内存。
+
+3. 为何将`const`用于引用返回类型
+
+首先来看一下下面的语句：
+
+```cpp
+accumulate(dup,five) = four;
+```
+
+语句的效果是：先用`five`的数据添加到`dup`中，再使用`four`的内容覆盖`dup`的内容。这是一个很奇怪的语句，但为什么这样的语句可以编译通过呢？在赋值语句中，左边必须是可以修改的佐值。也就是说，在赋值表达式中，左边的子表达式必须标识一个可修改的内存块。在这里函数返回指向`dup`的引用，因此它确实是一个这样的内存块，因此这条语句是合法的。但如果是常规（非引用）返回类型是右值，不能通过地址访问的值。这样的表达式就只能存在于赋值语句的右边，比如，字面值（10.0）和表达式（x + y ）。
+
+但是如果我们将`accumulate()`定义前面加一个`const`限制符，则函数将不能再被这样使用。
+
+### 8.2.5 将引用用于类对象
+
+通常，我们使用引用的方式，让函数将类（string, ostream, istream, ofstream, 和 ifstream）等类的对象作为参数。
+
+下面我们来看一个例程，例程中有些设计方案是糟糕的，甚至存在非常大的缺陷。
+
+```cpp
+// struote.cpp -- different designs
+#include <iostream>
+#include <string>
+using namespace std;
+string version1(const string & s1, const string & s2)
+{
+    string temp;
+    temp = s2 + s1 +s2;
+    return temp;
+}
+
+const string & version2 (string & s1, const string & s2)    // has side effect
+{
+    s1 = s2 + s1 + s2;
+    // safe to return reference passed to function
+    return s1;
+}
+/*
+const string & version3(string &s1, const string & s2)
+{
+    string temp;
+
+    temp = s2 + s1 + s2;
+    // unsafe to return reference to local variable
+    return temp;
+}
+*/
+int main(int argc, char *argv[])
+{
+    string input;
+    string copy;
+    string result;
+
+    cout << "Enter a string: ";
+    getline(cin,input);
+    copy = input;
+    cout << "Your string as entered: " << input << endl;
+    result = version1(input, "***");
+    cout << "Your string enhanced: " << result << endl;
+    cout << "Your orignal string: " << input << endl;
+
+    result = version2(input,"###");
+    cout << "Your string enhanced: " << result << endl;
+    cout << "Your orignal string: " << input << endl;
+
+/*
+    cout << "Resetting original string.\n";
+    input = copy;
+    result = version3(input,"@@@");
+    cout << "Your string enhanced: " << result << endl;
+    cout << "Your orignal string: " << input << endl;
+*/
+    return 0;
+}
+```
+
+将注释打开会导致报错：
+
+```
+.\strquote.cpp: In function 'const string& version3(std::__cxx11::string&, const string&)':
+.\strquote.cpp:21:12: warning: reference to local variable 'temp' returned [-Wreturn-local-addr]
+     string temp;
+            ^~~~
+```
+这时说我们将一个本地的变量返回了。
+
+加上注释后，的程序结果是：
+
+```
+Enter a string: FALSE    
+Your string as entered: FALSE
+Your string enhanced: ***FALSE***
+Your orignal string: FALSE
+Your string enhanced: ###FALSE###
+Your orignal string: ###FALSE###
+```
+
+<font color = oragne>程序说明：</font>
+
+我们直接来解释为什么`version3`会无法通过编译。因为`version3`返回的是一个指向声明变量的一个引用。但是当这个函数运行完成后，其`temp`变量的内存就被删除掉了，无法用这样的方式进行编译。
+
+### 8.2.6 对象、继承和引用
+
+书上说了一大堆，我也没有看懂是啥意思，这里还是直接放例程吧。。。
+
+<font color = oragne>例程：</font>
+
+```cpp
+// filefunc.cpp -- function with ostream & parameter
+
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+
+using namespace std;
+
+void file_it(ostream & os, double fo, const double fe[], int n)
+{
+    ios_base::fmtflags initial;
+    initial = os.setf(ios_base::fixed); // save initial formatting state
+    os.precision(0);
+    os << "Focal length of objective: " << fo << " mm\n";
+    os.setf(ios::showpoint);
+    os.precision(1);
+    os.width(12);
+    os << "f.l. eyepiece";
+    os.width(15);
+    os << "magnification" << endl;
+    for (int i = 0; i < n; i++)
+    {
+        os.width(12);
+        os << fe[i];
+        os.width(15);
+        os << int (fo/fe[i] + 0.5) <<endl;
+    }
+    os.setf(initial);   // restore initial formatting state
+}
+const int LIMIT = 5;
+int main(int argc, char const *argv[])
+{
+    ofstream fout;
+    const char * fn = "ep - data.txt";
+    fout.open(fn);
+    if(!fout.is_open())
+    {
+        cout << "Can't open" << fn << ". Bye. \n";
+        exit(EXIT_FAILURE);
+    }
+    double objective;
+    cout << "Enter the fical length of your "
+        << "telescope objective in mm: ";
+    cin >> objective;
+    double eps[LIMIT];
+    cout << "Enter the focal lengths, in mm, of " << LIMIT
+        << "eyepieces: \n";
+    for(int i = 0; i < LIMIT; i++)
+    {
+       cout << "Eyepiece #" << i + 1 << ": ";
+       cin >> eps[i]; 
+    }
+    file_it(fout, objective, eps, LIMIT);
+    file_it(cout, objective, eps, LIMIT);
+    cout << "Done\n";
+    return 0;
+}
+```
+
+<font color = oragne>输出结果：</font>
+
+```
+Enter the focal lengths, in mm, of 5eyepieces: 
+Eyepiece #1: 30
+Eyepiece #2: 19
+Eyepiece #3: 14
+Eyepiece #4: 8.8
+Eyepiece #5: 7.5
+Focal length of objective: 1800 mm
+f.l. eyepiece  magnification      
+        30.0             60       
+        19.0             95       
+        14.0            129       
+         8.8            205       
+         7.5            240       
+Done
+```
+
+<font color = oragne>程序说明：</font>
+
+对于该程序，最重要的一点是，参数`os`（其类型是`ostream &`）可以指向`ostream`对象（如cout），也可以指向`ofstream`对象（fout）。该程序还演示了如何使用`ostream`类中的格式化方法。方法`setf()`让您能够设置各种格式化的状态。例如，方式调用`setf(ios_base::fixed)`将对象置于使用定点表示法的模式；`setf(ios_base::showpoint)`将对象置于显示小数点的模式，即使小数部分为零。方法`precision()`指定了显示多少位小数（假定对象处于定点模式下）。所有这些设置都将一直保持不变，直到再次调用响应的方法重新设置它们。方法`width()`设置下一次输出操作使用的字段宽度，这种设置只在显示下一个值时有效，然后将恢复到默认设置。默认的字段宽度都为零，这意味刚好能够容纳下要显示的内容。
+
+函数`file_it()`使用了两个有趣的方法调用：
+
+```cpp
+ios_base::fmtflags initial;
+initial = os.setf(ios_base::fixed);  // save initial formatting state
+...
+os.setf(initial); 
+```
+
+方法`setf()`返回调用它之前有效的所有格式化设置。`ios_base::fmtflages`是存储这种信息所需的数据类型名称。因此，将返回值赋值给`initial`将存储调用`file_it()`之前的格式化设置，然后便可以使用变量`initial`作为参数来调用`setf()`，将所有的格式化设置恢复到原来的值。因此，该函数将对象反倒传递给`file_it()`之前的状态。
+
+需要说明的最后一点是，每一个对象都储存了字节的格式化设置。因此，当程序将`cout`传递给`file_it()`的时候`cout`的设置将被修改，然后被回复；当程序将`fout`传递给`file_it()`时，`fout`的设置将被修改，然后被回复。
+
+### 8.2.7 何时使用引用参数
+
+使用引用参数的主要原因有两个：
+* 程序员能够修改调用函数中的数据对象。
+* 通过传递引用而不是整个数据对象，可以提高程序的运行速度。
+
+当数据对象比较大的时候（如结构和类对象），第二个原因更加重要。这些也是使用指针参数的原因。至于什么时候使用指针？什么时候使用引用？什么时候按值传递呢？下面有一些指导：
+
+对于使用传递的值而不作修改的函数。
+* 如果数据对象很小，如内置数据类型或小型结构，则按值传递。
+* 如果数据对象时数组，则使用指针，因为这是唯一的选择，并将指针声明为指向`const`的指针。
+* 如果数据对象是较大的结构，则使用`const`指针或`const`引用，以提高程序的效率。这样可以节省赋值结构所需要的时间和空间。
+* 如果数据对象是类对象，则使用`const`引用。类设计的语义常常要求使用引用。
+
+对于修改调用函数中的数据的函数:
+* 如果数据对象是内置数据类型，则使用指针。如果看到如：`fixit(&x)`这样的代码（其中`x`是`int`），则很明显，该函数将修改`x`。
+* 如果数据对象是数组，则只能使用指针。
+* 如果数据对象是结构，则使用引用或指针。
+* 如果数据对象是类对象，则使用引用。
+
+
