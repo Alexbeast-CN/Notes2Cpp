@@ -154,5 +154,99 @@ double gronk(float n, float m);     // allowed
 <font color = orange> 例程：</font>
 
 ```cpp
+// leftover.cpp -- overloading the left() function
+#include <iostream>
+
+// This function returns the first ct digits of the number num
+uint64_t left(uint64_t num, uint8_t ct)
+{
+    uint64_t digits = 1;
+    uint64_t n = num;
+
+    if (ct == 0 || num == 0)    // 在本题中其实用不到
+        return 0;
+    while (n /= 10)
+        digits++;
+    if (digits > ct)
+    {
+        ct = digits - ct;
+        while (ct--)            // 当 ct-- != 0 时
+            num /= 10;          // num 的位数减 1
+        return num; // return left ct digits
+    }
+    else
+        return num;
+}
+
+// This function returns a pointer to a new string
+// consisting of the first n characters in the str string
+char *left(const char *str, int n = 1)
+{
+    if (n < 0)
+        n = 0;
+    char *p = new char[n + 1];
+    int i;
+    for (i = 0; i < n && str[i]; i++)
+        p[i] = str[i]; // copy characters
+    while (i <= n)
+        p[i++] = '\0'; // set rest of string to '\0'
+    return p;
+}
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    char trip[9] = "Hawaii!!"; //test value
+    uint64_t n = 12345678;     // test value
+    int i;
+    char *temp;
+
+    for (i = 0; i < 10; i++)
+    {
+        cout << left(n, i) << endl;
+        temp = left(trip, i);
+        cout << temp << endl;
+        delete[] temp; // point to temporary storage
+    }
+    return 0;
+}
+```
+
+<font color = orange> 输出结果：</font>
 
 ```
+0
+
+1
+H
+12
+Ha
+123
+Haw
+1234
+Hawa
+12345
+Hawai
+123456
+Hawaii
+1234567
+Hawaii!
+12345678
+Hawaii!!
+12345678
+Hawaii!!
+```
+
+<font color = orange> 程序说明：</font>
+
+首先我们创建了2个`left()`函数，让`left()`可以分别重载为处理文字的函数，和处理数字的函数。主函数中循环输出数字以及其对应的字母，而`left()`数字函数中，` while (n /= 10)`是因为每个数位代表一个字母。函数的两个重载的写法有异曲同工之妙。
+
+### 8.4.2 个人的体会
+
+对于何时使用个人的理解是，为一个函数提供多种可以处理的数据格式，一般函数的名称暗示了这个函数的功能，但是由于C++多种的数据类型，一个函数往往难以应对各种数据类型，因此需要使用重载。
+
+当函数的重载写好后，
+
+## 8.5 函数模板
+
+
