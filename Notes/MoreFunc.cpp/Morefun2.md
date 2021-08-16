@@ -249,4 +249,158 @@ Hawaii!!
 
 ## 8.5 函数模板
 
+函数模板是通用的函数描述，也就是说，它们使用泛型来定义函数，其中的泛型可用具体的类型（如`int`或者`double`）替换。通过将类型作为参数传递给模板，可使得编译器生成该类型的函数。由于模板允许以泛型（而不是具体类型）的方式编写程序，因此有时也被称为通用编程。下面用一个例程来展示泛型的使用方法：
 
+
+```cpp
+// funtemp.cpp -- using a function template
+#include <iostream>
+// function template prototype
+template <typename T> // or class T
+void Swap(T &a, T &b);
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+        int i = 10;
+        int j = 20;
+        cout << "i, j = " << i << ", " << j << endl;
+        cout << "Using compiler-generated int swapper: \n";
+        Swap(i, j); // generates void Swap(int &, int &)
+        cout << "Now i, j = " << i << ", " << j << endl;
+
+        double x = 24.5;
+        double y = 81.2;
+        cout << "x, y = " << x << ", " << y << endl;
+        cout << "Using compiler-generated int swapper: \n";
+        Swap(x, y); // generates void Swap(double  &, double &)
+        cout << "Now x, y = " << x << ", " << y << endl;
+    return 0;
+}
+
+// funtion template definition
+template <typename T> // or class T
+void Swap(T &a, T &b)
+{
+    T temp; // temp a variable of type T
+    temp = a;
+    a = b;
+    b = temp;
+}
+```
+
+程序结果：
+
+```
+i, j = 10, 20
+Using compiler-generated int swapper:
+Now i, j = 20, 10
+x, y = 24.5, 81.2
+Using compiler-generated int swapper:
+Now x, y = 81.2, 24.5
+```
+
+程序说明：
+
+函数模板允许以任意类型的方式来定义函数。例如：
+
+```cpp
+template <typename T> // or class T
+void Swap(T &a, T &b)
+{
+    T temp; // temp a variable of type T
+    temp = a;
+    a = b;
+    b = temp;
+}
+```
+
+上面一段的关键字`typename`可以使用`class`替换。`typename`和`template`的作用就是指出要创建一个模板，这个模板中的类型可以是任意类型。在大型工程中，使用模板可以让我们不用为向后兼容的问题产生烦恼。以上面的程序为例，使用模板后，编译器就会自动把`a`和`b`的`int`值传递给`temp`，`x`和`y`的`double`类型也一样。这个给人感觉类似于使用`auto`。
+
+### 8.5.1 重载的模板
+
+需要多个对不同类型使用同一算法的函数时，可以使用模板。然后不是所有类型都可以使用相同的算法。为了满足这种需求，可以像使用函数重载一样重载模板定义。和常规的函数重载一样，被重载的模板的函数特征标必须不同。下面将用一个例程来展示：
+
+```cpp
+// twotemps.cpp -- using overload template functions
+#include <iostream>
+template<class T>      // original template
+void Swap(T &a, T &b);
+
+template<class T>       // new template
+void Swap(T *a, T *b, int n);
+
+void Show(int a[]);
+const int Lim = 8;
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    int i = 10;
+    int j = 20;
+    cout << "i, j = " << i << ", " << j << endl;
+    cout << "Using compiler-generated int swapper: \n";
+    Swap(i, j); // matches original template
+    cout << "Now i, j = " << i << ", " << j << endl;
+
+    int d1[Lim] = {0, 7, 0, 4, 1, 7, 7, 6};
+    int d2[Lim] = {0, 7, 2, 0, 1, 9, 6, 9};
+    cout << "Original array:\n";
+    Show(d1);
+    Show(d2);
+    Swap(d1,d2,Lim);        // matches new template
+    cout << "Swapped array:\n";
+    Show(d1);
+    Show(d2);
+
+    return 0;
+}
+
+template <class T>
+void Swap(T &a, T &b)
+{
+    T temp;
+    temp = a;
+    a = b;
+    b = temp;
+}
+
+template <class T>
+void Swap(T *a, T *b, int n)
+{
+    T temp;
+    for (int i = 0; i < n; i++)
+    {
+        temp = a[i];
+        a[i] = b[i];
+        b[i] = temp;
+    }
+    
+}
+
+void Show(int a[])
+{
+    using namespace std;
+    cout << a[0] << a[1] << "/";
+    cout << a[2] << a[3] << "/";
+    for (int i = 0; i < Lim; i++)
+    {
+        cout << a[i];
+    }
+    cout << endl;
+    
+}
+```
+
+程序输出：
+
+```
+i, j = 10, 20
+Using compiler-generated int swapper: 
+Now i, j = 20, 10
+Original array:
+07/04/07041776
+07/20/07201969
+Swapped array:
+07/20/07201969
+07/04/07041776
+```
