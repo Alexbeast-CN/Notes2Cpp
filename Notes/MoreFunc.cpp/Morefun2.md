@@ -404,3 +404,264 @@ Swapped array:
 07/20/07201969
 07/04/07041776
 ```
+
+### 8.5.2 显式具体化
+
+假设定义了以下的结构：
+
+struct job
+{
+    char name[40];
+    double salary;
+    int floor;
+};
+
+如果希望用一个模板函数来交换`salary`和`floor`成员，而不交换`name`成员，无法使用模板重载来完成。然后，我们可以提供以一个具体化函数定义 -- 称为显示具体化。下面我们来看一个例程：
+
+```cpp
+// twoswap.cpp -- specialization overrides a template
+#include <iostream>
+template <class T>
+void Swap(T &a, T &b);
+
+struct job
+{   
+    char name[40];
+    double salary;
+    int floor;
+};
+
+// explicit specialization
+template <> void Swap<job>(job &j1, job &j2);
+void Show(job &j);
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    cout.precision(2);
+    cout.setf(ios::fixed, ios::floatfield);
+    int i = 10, j = 20;
+    cout << "i, j = " << i << ", " << j << endl;
+    cout << "Using compiler-generated int swapper:\n";
+    Swap(i,j);
+    cout << "Now i, j = "<< i << ", " << j << endl;
+
+    job sue = {"Susan Yaffee", 73000.60, 7};
+    job sidney = {"Sidney Taffee", 78060.72, 9};
+    cout << "Before job swapping: \n";
+    Show(sue);
+    Show(sidney);
+    Swap(sue, sidney);  // uses void Swap(job &, job &)
+    cout << "After job swapping: \n";
+    Show(sue);
+    Show(sidney);
+
+    return 0;
+}
+
+template <class T>
+void Swap(T &a, T &b)
+{
+    T temp;
+    temp = a;
+    a = b;
+    b = temp;
+}
+
+// swaps just the salary and floor fields of a job structure
+
+template <> void Swap<job>(job &j1, job &j2)    // specialization
+{
+    double t1;
+    int t2;
+    t1 = j1.salary;
+    j1.salary = j2.salary;
+    j2.salary = t1;
+    t2 = j1.floor;
+    j1.floor = j2.floor;
+    j2.floor = t2;
+}
+
+void Show(job &j)
+{
+    using namespace std;
+    cout << j.name << ": $" << j.salary
+         << "on floor " << j.floor << endl;
+    
+}
+```
+
+程序输出：
+
+```cpp
+i, j = 10, 20
+Using compiler-generated int swapper:
+Now i, j = 20, 10
+Before job swapping: 
+Susan Yaffee: $73000.60on floor 7    
+Sidney Taffee: $78060.72on floor 9   
+After job swapping: 
+Susan Yaffee: $78060.72on floor 9    
+Sidney Taffee: $73000.60on floor 7
+```
+
+程序说明：
+
+上面的例程我们主要学习的点在于函数声明：
+
+```cpp
+template <> void Swap<job>(job &j1, job &j2);    // specialization
+```
+
+`template<>` 表明函数使用了模板，`Swap<job>`中的`<job>`是可选的，因为函数的参数类型表明，这是一个`job`的具体化，因此上面的声明也可以化简为：
+
+```cpp
+template <> void Swap<>(job &, job &);    // specialization
+```
+
+### 8.5.3 编译器的选择
+
+下面将再利用两个例子来展示编译器在函数模板中的选择：
+
+例一：
+
+```cpp
+// tempover.cpp -- template overloading
+#include <iostream>
+
+template <class T>      // template A
+void ShowArray(T arr[], int n);
+
+template <class T>
+void ShowArray(T *arr[], int n);
+
+struct debts
+{
+    char name[50];
+    double amount;
+};
+
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    int things[6] = {12, 32, 103, 302, 310, 130};
+    struct debts mr_E[3] = 
+    {
+        {"Ima Wolfe", 2400.0},
+        {"Ura Foxe", 1300.0},
+        {"Iby Stout", 1800.0}
+    };
+
+    double * pd[3];
+
+    // set pointer to the amount members of the structures in mr_E
+    for (int i = 0; i < 3; i++)
+    {
+        pd[i] = &mr_E[i].amount;
+    }
+
+    cout << "Listing Mr.E's counts of things:\n";
+    // things is an array of int
+    ShowArray(things, 6);   // uses template A
+    cout << "Listing Mr.E's debts:\n";
+    ShowArray(pd,3);    // uses template B
+    return 0;
+}
+
+
+template<typename T>
+void ShowArray(T arr[], int n)
+{
+    using namespace std;
+    cout << "template A\n";
+    for (int i = 0; i < n; i++)
+    {
+        cout << arr[i] << ' ';
+    }
+    cout  << endl;
+}
+
+template<typename T>
+void ShowArray(T * arr[], int n)
+{
+    using namespace std;
+    cout << "template B\n";
+        for (int i = 0; i < n; i++)
+    {
+        cout << *arr[i] << ' ';
+    }
+    cout  << endl;
+
+}
+```
+
+程序输出：
+```
+Listing Mr.E's counts of things:
+template A
+12 32 103 302 310 130
+Listing Mr.E's debts:
+template B
+2400 1300 1800
+```
+
+程序说明：
+
+由于一对一的完全对应关系，编译器能够准确的找到所应用的函数重载。
+
+例二：
+
+```cpp
+// choices.cpp -- choosing a template
+#include <iostream>
+    using namespace std;
+
+template<typename T>
+T lesser(T a, T b)  // #1
+{
+    cout << "#1 ";
+    return a < b ? a : b;
+}
+
+int lesser(int a, int b) // #2
+{
+    cout << "#2 ";
+    a = a < 0 ? -a : a;
+    b = b < 0 ? -b : b;
+    return a < b ? a : b;
+}
+
+int main(int argc, char const *argv[])
+{
+
+    int m = 20;
+    int n = 30;
+    double x = 16.3;
+    double y = 29.0;
+
+    cout << lesser(m,n) << endl;        // #1
+    cout << lesser(x, y) << endl;       // #2
+    cout << lesser<>(m, n ) << endl;    // #3
+    cout << lesser<int>(x,y) << endl;   // #4
+    return 0;
+}
+```
+
+程序结果：
+
+```
+#2 20
+#1 16.3
+#1 20
+#1 16
+```
+
+程序说明：
+
+上面的例程中提供了一个模板和一个标准函数，其中模板返回两个值中较小的一个，而标准函数返回两个值中绝对值较小的一个。如果函数定义是在使用函数之前，它将充当函数原型。
+
+第一次调用，参数为两个`int`值，与非模板函数完全匹配，因此使用#2.
+第二次调用，参数为两个`double`值，与薄板匹配，因此使用#1.
+第三次调用，`lesser<>`指出要使用模板函数，因此使用#1.
+第四次调用语句`lesser<int>(x, y)` 是一个显示实例化，x和y被强制转换为了`int`值。这就是最后一个出现`16`的原因。
