@@ -283,6 +283,234 @@ extern int fleas;
 
 下面用一个例程来展示这一概念：
 
+**程序9.5**
 ```cpp
+// external.cpp -- external variables
+// compile with support.cpp
+
+#include <iostream>
+using namespace std;
+
+// external variable
+double warming = 0.3;    //warming defined
+// function prototypes
+void update(double dt);
+void local();
+
+int main(int argc, char const *argv[]) // uses global variable
+{
+    cout << "Global warming is " << warming << " degrees. \n";
+    update(0.1);         // call function to change warming
+    cout << "Global warming is " << warming << " degrees. \n";
+    local();            // call function with local warming
+    cout << "Global warming is " << warming << " degrees. \n";
+    return 0;
+}
 
 ```
+
+**程序 9.6**
+
+```cpp
+// suppport.cpp -- use external variable
+// complie with external.cpp
+#include <iostream>
+extern double warming;   // using warming from another file
+
+// function prototypes
+void update (double dt);
+void local();
+
+using std::cout;
+void update (double dt) // modifies global variable
+{
+    extern double warming;  //optional redeclaration
+    warming += dt;      // uses global warming
+    cout << "Updating global warming to " << warming;
+    cout << " degrees.\n";
+}
+
+void local()            // uses local variable
+{
+    double warming = 0.8;   // new variable hides external one
+
+    cout << "Local warming = " << warming << " degrees.\n";
+    // Access global variable with the 
+    // scope resolution operator
+    cout << "But global warming = " << ::warming;
+    cout << " degrees.\n";
+}
+```
+
+**程序输出：**
+
+```
+Global warming is 0.3 degrees.         
+Updating global warming to 0.4 degrees.
+Global warming is 0.4 degrees.         
+Local warming = 0.8 degrees.
+But global warming = 0.4 degrees.      
+Global warming is 0.4 degrees. 
+```
+
+**程序说明：**
+
+在上面的程序中，最值得关注的地方是`local()`函数，该函数中重新定义了一个局部变量`warming`，这个局部变量使得全局变量被隐藏了。此后，又使用了作用域运算符(::)获取到全局变量`warming`。
+
+### 9.2.5 静态持续性、内部链接
+
+将`static`限定符用于作用域为整个文件的变量时，该变量的链接性及那个为内部的。在多文件程序中，内部链接性和外部链接性之间的差别很大。并不是所有变量都需要成为全局变量，一些变量只需要在一个文件中使用，并且需要防止重名，需要使用`static`限定词将变量将变量限制在一个文件中。
+
+下面还是由程序来演示这一方式的用法：
+
+程序 9.7 twofile1.cpp
+
+```cpp
+// twofile1.cpp -- varibles with external and internal linkage
+#include <iostream>
+int tom = 3;            // external variable definition
+int dick = 30;          // external variable definition
+static int harry = 300; // static, internal linkage
+
+// function prototype
+void remote_access();
+
+int main(int argc, char const *argv[])
+{
+    using namespace std;
+    cout << "main() reports the following addresses: \n";
+    cout << &tom << " = &tom," << &dick << " = &dick, ";
+    cout << &harry << " = &harry\n";
+    remote_access();
+    return 0;
+}
+```
+
+程序 9.9 twofile2.cpp
+
+```cpp
+// twofile2.cpp -- variables with internal and external linkage
+#include <iostream>
+extern int tom;       // tom defined elsewhere
+static int dick = 10; // overrides external dick
+int harry = 200;      // external variable definition,
+                      // no confict with twofile1 harry
+
+void remote_access()
+{
+    using std::cout;
+    cout << "remote_access() reports the following addresses: \n";
+    cout << &tom << " = &tom," << &dick << " = &dick, ";
+    cout << &harry << " = &harry\n";
+}
+```
+
+程序输出：
+
+```
+main() reports the following addresses:
+0x403010 = &tom,0x403014 = &dick, 0x403018 = &harry
+remote_access() reports the following addresses:
+0x403010 = &tom,0x403020 = &dick, 0x403024 = &harry
+```
+
+### 9.2.6 静态储存持续性、无链接性
+
+无链接性的持续变量是指在代码块中，用`static`限制的变量。它的特殊之处是在声明变量的函数结束后变量依然存在，因此二次调用依然可以使用，其变量的值只会在第一次被调用的时候被初始化，往后不会再初始化了。
+
+下面用一个例程来展示
+
+程序9.9 staticfile.cpp
+
+```cpp
+// static.cpp using a static local variable
+#include <iostream>
+
+// constants
+const int ArSize = 10;
+// function prototype
+void strcount(const char *str);
+
+int main()
+{
+    using namespace std;
+    char input[ArSize];
+    char next;
+
+    cout << "Enter a line:\n";
+    cin.get(input, ArSize);
+    while (cin)
+    {
+        cin.get(next);
+        while (next != '\n') // string didn't fit!
+            cin.get(next);   // dispose of remainder
+        strcount(input);
+        cout << "Enter next line (empty line to quit):\n";
+        cin.get(input, ArSize) ;
+    }
+    cout << "Bye\n";
+    return 0;
+}
+
+void strcount(const char * str)
+{
+    using namespace std;
+    static int total = 0; // static local varible
+    int count = 0;        // auto local variable
+
+    cout << "\"" << str << "\" constains ";
+    while (*str++) // go to end of string
+        count++;
+    total += count;
+    cout << count << " characters\n";
+    cout << total << " characters total\n";
+}
+```
+
+程序输出：
+
+```
+Enter a line:
+Vscode
+"Vscode" constains 6characters       
+6 characters total
+Enter next line (empty line to quit):
+Vscode dead
+"Vscode de" constains 9characters    
+15 characters total
+Enter next line (empty line to quit):
+
+Bye
+```
+
+程序说明：
+
+之前我们讲过`get()`和`getlin()`的区别。那么这里使用`get()`目的是为了读取到用户输入一行内容后的换行符，上面程序中使用到的代码块：
+
+```cpp
+    while (next != '\n') // string didn't fit!
+        cin.get(next);   // dispose of remainder
+```
+
+其目的是为了处理用户的错误输入，因为程序中设置的输入长度为9个字符（第10个位字符为空字符）。如果用户的输入超出了9个字符，则程序会通过上面的代码，将多输入的字符导入`next`中，直到读取到用户输入的换行符为止。
+
+另外一个的地方是：
+
+```cpp
+    while (*str++) // go to end of string
+        count++;
+```
+
+这里的`while`条件是`*str = true`，逻辑是`*str++`，因为`str`的最后一位是`\0`所以，根据布尔值的逻辑，循环一直运行到字符串的最后一位。
+
+### 9.2.7 说明符和限定符
+
+**存储说明符：**
+
+* register;
+* static;
+* extern;
+* thread_local
+* mustable
+
+除了`thread_local`其他的限制符都不能在声明中与其他的限制符连用。
