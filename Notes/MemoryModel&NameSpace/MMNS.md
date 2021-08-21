@@ -56,7 +56,7 @@ void show_polar(polar dapos);
 ```
 
 程序9.1     main.cpp
----
+
 ```cpp
 // file1.cpp -- example of a three-file program
 #include <iostream>
@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 ```
 
 程序9.2 func.cpp
----
 
 ```cpp
 // func.cpp -- contains fucntions called in main.cpp
@@ -156,7 +155,6 @@ C++函数的作用域可以是整个类或者整个命名空间（包括全局�
 这表明，自动变量旨在包含它们的函数或代码块中可见。
 
 程序 9.4    auto.cpp
----
 ```cpp
 // auto.cpp -- illustrating scope of automatic variables
 #include <iostream>
@@ -212,4 +210,79 @@ In main(), texas = 31, &texas =0x61fe1c
 In main, years = 2011, &years = 0x61fe18
 ```
 
-可以看出，3个`texas`的地址各不相同。
+可以看出，3个`texas`的地址各不相同。这是因为程序在执行`main()`时，程序为`texas`和`year`分配空间，使得这些变量可见。当执行到过程`oil()`中的内部代码块时，原来的`texas`将不可见，它将被一个更新的定义代替。然而，当代码块运行结束时，其中定义的变量也将会过期。这类自动变量，会被编译器存放在栈中，其进出逻辑为先进后出。
+
+### 9.2.3 静态持续变量
+
+C++为静态存储持续变量提供了3种链接性：外部链接（可在其他文件种访问）、内部链接（只能在当前文件种访问）、无链接性（只能在当前函数或代码块种访问）。这3种链接性都在整个过程执行期间存在，与自动变量相比，它们的寿命更长。储存空间也不是栈而将被编译器分配固定的内存空间。
+
+下面来介绍如果创建这3种静态持续变量：
+
+1. 外部链接的静态持续变量需要在**代码块的外面**声明它。
+2. 内部链接的静态持续变量需要在**代码块外**声明它，并使用`static`限制符。
+3. 如果是没有连接性的静态持续变量，需要在**代码块内**声明它，并使用`static`限制符。
+
+用代码的形式，分别展示以上方法：
+
+```cpp
+int global = 1000;          // static duration, external linkage
+static int one_file = 50;   // static duration, internal linkage
+
+int main()
+{
+    ...
+}
+
+void func1(int n)
+{
+    static int count = 0;   // static duration, no linkage
+    int llama = 0;
+}
+
+void func2(int q)
+{
+
+}
+```
+
+如前面所说的，所有静态持续变量（global, one_file, count) 在整个程序执行期间都存在。在`func1`中声明的变量`count`的作用域为局部，没有连接性，这意味着只能在`func1()`函数中使用，就像自动变量`llama`一样，但是域`llama`不同的是，即使在`func1()`函数没有被执行的时候，`count`也会存在于存储中。而内外部链接的区别则是，内部的只能在一个文件中调用，而外部的则可以在其他的文件中使用。
+
+### 9.2.4 静态持续性、外部连接性
+
+单定义规则：
+
+一方面，在每个使用外部变量的文件中，都必须声明它；另一方面，C++有“单定义规则” (One Definition Rule, ODR), 该规则指出，变量只能定义一次，为了满足这种需求，C++提供了两种变量声明。一种是定义声明 (defining declaration)或简称为定义 (definition)，它给变量分配储存空间；另外一种是引用声明 (referencing declaration) 或简称为声明 (declaration)，它不会给变量分配储存空间，因为它引用已有的变量。引用声明使用关键字`extern`，且不进行初始化；否则，声明为定义，导致分配内存空间：
+
+```cpp
+double up;              // definition, up is 0
+extern int blem;        // blem defined elsewhere
+extern char gr = 'z'    // defnition because initializad
+```
+
+如果要在多个文件种使用外部变量，只需要在一个文件中包含该变量的定义（单定义规则），但在使用该变量的其他所有文件中，都必须使用关键字 `extern` 声明它：
+
+```cpp
+// file01.cpp
+extern int cats = 20;   // definition because of initialization
+int dogs = 22;          // definition
+int fleas;              // definition
+...
+
+// file02.cpp
+// use cats and dogs from file01.cpp
+extern int dogs;        // not definition because they use 
+extern int cats;        // extern and have no initialization
+...
+
+// file03.cpp
+// use cats, dogs, and fleas from file01.cpp
+extern int dogs;
+extern int cats;
+extern int fleas;
+```
+
+下面用一个例程来展示这一概念：
+
+```cpp
+
+```
