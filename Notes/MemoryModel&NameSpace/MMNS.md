@@ -659,3 +659,241 @@ using jill::pal;
 
 2. using 编译指令和 using 声明值比较
 使用 `using`编译指令导入一个名称空间中所有的名称与使用多个`using`声明时不一样的，而更像是大量使用作用域解析运算符。使用`using` 声明时，就好像声明了相应的名称一样。如果某个名称已经在函数中声明了，则不能用`using`声明导入相同的名称。然而，使用`using`编译指令时，将进行名称解析。
+
+在之前的内容中，大多数都是使用下面的方式进行名称空间使用：
+
+```cpp
+#include <iostream>
+int main()
+{
+    using namespace std;
+}
+```
+
+首先，`#include`将头文件`iostream`放到名称空间`std`中，然后，`using`编译指令是该名称空间在`main()`函数中可用。
+
+但在实际的编程中，我们不建议这样使用名称空间，而是使用下面的方法：
+
+```cpp
+
+using std::cout;
+using std::cin;
+```
+或者，
+
+```cpp
+std::cout << "Hello" << std::endl;
+```
+
+3. 名称空间的其他特性
+
+可以将名称空间进行嵌套：
+
+```cpp
+namespace elements
+{
+    namespace fire
+    {
+        int flame;
+        ...
+    }
+}
+```
+
+那么要想使用`flame`变量，需要`elment::fire::flame`两次解析域符号。这样的方式会显得比较复杂，但也有简化方法：
+
+```cpp
+namespace MEF = elements::fire;
+using MEF::flame;
+```
+
+4. 未命名的名称空间
+
+可以通过省略名称空间的方式来创建未命名的名称空间：
+
+```cpp
+namespace 
+{
+    int ice;
+    int men;
+}
+```
+
+### 9.3.3 名称空间示例
+
+现在来看看一个多文件示例，该示例说明了名称空间的一些特性。
+
+程序 9.11 namesp.h
+```cpp
+// namesp.h
+#ifndef _NAMESP_H_
+#define _NAMESP_H_
+
+#include <string>
+// create the pers and debts namespaces
+namespace pers
+{
+    struct Person
+    {
+        std::string fname;
+        std::string lname;
+    };
+    void getPerson(Person &);
+    void showPerson(const Person &);
+}
+
+namespace debts
+{
+    using namespace pers;
+    struct Debt
+    {
+        Person name;
+        double amount;
+    };
+    void getDebt(Debt &);
+    void showDebt(const Debt &);
+    double sumDebts(const Debt ar[], int n);
+} // namespace debts
+
+#endif
+```
+
+程序 9.12 namesp.cpp
+
+```cpp
+// namesp.cpp -- namespaces
+#include <iostream>
+#include "namesp.h"
+
+namespace pers
+{
+    using std::cout;
+    using std::cin;
+    using std::endl;
+
+    void getPerson(Person & rp)
+    {
+        cout <<"Enter first name: ";
+        cin >> rp.fname;
+        cout << "Enter last name: ";
+        cin >> rp.lname;
+    }
+
+    void showPerson(const Person & rp)
+    {
+        std::cout << rp.lname << ", " << rp.fname; 
+    }  
+}
+
+namespace debts
+{
+    void getDebt(Debt & rd)
+    {
+        getPerson(rd.name);
+        std::cout << "Enter debt: ";
+        std::cin >> rd.amount;
+    }
+    void showDebt(const Debt & rd)
+    {
+        showPerson(rd.name);
+        std::cout << ": $" << rd.amount << std::endl;
+    }
+    double sumDebts(const Debt ar[], int n)
+    {
+        double total = 0;
+        for (int i = 0; i < n; i++)
+        {
+            total += ar[i].amount; 
+        }
+        return total;
+    }
+}
+```
+
+程序 9.12   namessp.cpp
+
+```cpp
+// namessp.cpp -- using namespaces
+#include <iostream>
+#include "namesp.h"
+
+void other (void);
+void another (void);
+
+int main(int argc, char *argv[])
+{
+    using debts::Debt;
+    using debts::showDebt;
+
+    Debt golf = { {"Benny","Goatsniff"}, 120.0};
+    showDebt(golf);
+    other();
+    another();  
+    return 0;
+}
+
+void other (void)
+{
+    using std::cout;
+    using std::endl;
+
+    using namespace debts;
+
+    Person dg = {"Doodles", "Glister"};
+    showPerson(dg);
+    cout << endl;
+    Debt zippy[3];
+    int i;
+    for ( i = 0; i < 3; i++)
+    {
+        getDebt(zippy[i]);
+    }
+
+    for ( i = 0; i < 3; i++)
+    {
+        showDebt(zippy[i]);
+    }
+    cout << "Total debt: $" << sumDebts(zippy, 3) << endl;
+    return;
+    
+}
+
+void another (void)
+{
+    using pers::Person;
+    Person collector = {"Milo", "Rightshift"};
+    pers::showPerson(collector);
+    std::cout << std::endl;
+}
+```
+
+程序输出：
+
+```
+Goatsniff, Benny: $120
+Glister, Doodles      
+Enter first name: DDT 
+Enter last name: L
+Enter debt: 300
+Enter first name: MMM
+Enter last name: La
+Enter debt: 200
+Enter first name: Lsit
+Enter last name: L
+Enter debt: 2900
+L, DDT: $300
+La, MMM: $200
+L, Lsit: $2900
+Total debt: $3400
+Rightshift, Milo
+```
+
+### 9.3.4 名称空间及其前途
+
+随着程序员逐渐熟悉名称空间，将出现统一的编程理念。下面是当前的一些指导性原则。
+* 使用在已命名的名称空间中声明的变量，而不是使用外部全局变量；
+* 使用在已命名的名称空间中声明的变量，而不是使用静态全局变量；
+* 如果开发了一个函数库或类库，将其放在一个名称空间中；
+* 不要再头文件使用`using`编译命令，而应将`using`放在所有预处理器编译指令`#include`之后；
+* 导入名称时，首选使用作用域解析运算符或`using`声明的方法。
+
