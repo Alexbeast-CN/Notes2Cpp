@@ -514,3 +514,148 @@ Bye
 * mustable
 
 除了`thread_local`其他的限制符都不能在声明中与其他的限制符连用。
+
+**限定符说明：**
+
+1. cv限定符
+
+c指的是`const`而v指的是`volatile`。这里我们先讲`voliatile`。`voliatile`表明，即使冲洗代码没有对内存单元进行修改，其值也可能发生变化。举一个例子：加入编译器发现，程序在几条语句中两次使用了某个变量的值，则编译器可能不是让程序查找这个值两次，而是将这个值缓存到寄存器中。而`voliatile`就是告诉编译器，不要做这样的优化。
+
+2. mutable
+
+`mustable`之处，即使结构（或类）变量为`const`，其某个成员也可以被修改,比如：
+
+```cpp
+struct data
+{
+    char name[30]
+    mustable int accesses;
+};
+
+const data veep = {"Claybournne",0};
+strcpy(veep.name, "Joye Joux");     // not allowed
+veep.accesses++;                    // allowed
+```
+
+3. const
+
+`const`限定符对默认存储类型稍有影响。在默认情况下，全局变量的链接性为外部的，但是`const`全局变量的链接性是内部的。也就是说：
+
+```cpp
+const int fingers = 10;     // same as static const int fingers = 10
+```
+
+### 9.2.8 函数和链接性
+
+由于C++不允许在一个函数中定义另外一个函数，因此所有的函数的出巡持续性都是静态的。并且在默认情况下，函数的链接性为外部的，即可以在文件间共享。实际上，可以在函数原型中使用关键字`extern`来指出函数是在另一个文件中定义的（可选）。还可以使用关键字`static`将函数的链接性设置为内部的，使之只能在一个文件中使用。但是必须同时在原型和函数定义中使用该关键字：
+
+```cpp
+static int private(double x);
+...
+static int private(double x)
+{
+
+}
+```
+
+这意味着，该函数只在这个文件中可见，还意味着可以在其他文件中定义同名的函数。函数和变量都遵守单变量规则。
+
+### 9.2.9 存储方案和动态分配
+
+前面讲过运算符 `new`， 通过`new`分配的内存被称为动态内存。动态内存需要通过`new`和`delete`来控制，而不是由作用域和链接性规则来确定。这部分的内容暂时跳过。。。
+
+## 9.3 名称空间
+
+为了防止名称（变量、函数、结构、枚举、类以及类和结构的成员）之间发生冲突。C++提供了名称空间工具。
+
+### 9.3.1 传统的C++名称空间
+
+首先来复习一下C++已有的名称空间。
+
+1. 声明区域：
+
+声明区域可以是在其中进行声明的区域。例如，可以在函数外面声明全局变量，对于这种变量，其声明区域为其声明所在的文件。对于在函数中声明的变量，其声明区域为其声明所在的代码块。
+
+2. 作用域
+
+变量潜在的作用域从生命点开始，到其声明区域的结尾。因为潜在作用域比声明区域小，这是由于变量必须定义后才能使用。然后，变量并非在其潜在的作用域内的任何位置都是可见的。例如，它可能被另一个嵌套声明区域中的同名变量隐藏。
+
+### 9.3.2 新的名称空间特性
+
+C++新增了这样一个功能，即通过顶一个新的声明区域来创建命名的名称空间，这样做的目的之一是提供一个声明名称的区域。一个名称空间中的名称不会与另外一个名称空间的相同名称发生冲突，同时允许程序的其他部分使用该名称空间中声明的东西。例如：
+
+```cpp
+namespace Jack
+{
+    double pail;        // variable declaration
+    void fetch();       // function prototype
+    int pal;
+    struct well{    };  // structure declaration
+}
+
+namespace Jill
+{
+    double ducket(double n) { ...  }    // fucntion definition
+    double fetch;
+    int pal;                            // variable declaration
+    struct Hill { ... }                 // structure declaration
+}
+
+```
+
+想要访问名称空间，最简单的方法是通过作用域解析运算符`::`，使用名称空间来限定该名称：
+
+```cpp
+Jack::pail = 12.32;     // use a variable
+Jill::Hill mole         // create a type Hill structure
+Jack::fetch();          // use a function
+```
+
+违背装饰的名称（如`pail`）称为限定的名称(unqualified name)；包含名称空间的名称(如 `Jack::pail`)称为限定的名称(qualified name)。
+
+1. using 声明和 using 编译命令
+
+我们并不希望每次使用名称时都对它进行限定，因此C++提供了两种机制（using 声明和 using 编译指令）来简化对名称空间中名称的使用。using 声明使用特定的标识符可用，using 编译指令使整个名称空间可用。
+
+using 声明由被限定的名称和它前面的关键字 using 组成：
+
+```cpp
+using Jill::fetch;      // a using declaration
+```
+
+using 声明及那个特定的名称添加到它所属的声明区域中。例如 main() 中的 using 声明 `Jill::fetch`将 `fetch`添加到`main()`定义的声明区域中。完成该声明后，便可以使用名称`fetch`代替`Jill::fetch`。下面的代码说明了这样方式：
+
+```cpp
+namesapce Jill
+{
+    double bucket(double n)
+    {
+        ...
+    }
+
+    double fetch;
+    struct Hill{ ... };
+}
+
+char fetch;
+
+int main()
+{
+    Using Jill::fetch;      // put fetch into local namespace
+    double fetch;           // Error! Already have a local fetch
+    cin >> fetch;           // read a value into Jill::fetch
+    cin >> ::fetch;         // read a value into global fetch
+}
+```
+
+在使用上面方法的时候一定要注意不能出现二义性。下面举一个错误的示范：
+
+```cpp
+using jack::pal;
+using jill::pal;
+```
+
+这样的方式将两个不同名称空间的`pal`变量都变成了局部变量，这就导致在使用`pal`的使用，编译器不知道该使用哪一个名称空间的`pal`而报错。
+
+2. using 编译指令和 using 声明值比较
+使用 `using`编译指令导入一个名称空间中所有的名称与使用多个`using`声明时不一样的，而更像是大量使用作用域解析运算符。使用`using` 声明时，就好像声明了相应的名称一样。如果某个名称已经在函数中声明了，则不能用`using`声明导入相同的名称。然而，使用`using`编译指令时，将进行名称解析。
